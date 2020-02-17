@@ -188,6 +188,7 @@ export default Vue.extend({
 			limit: 6,
 			days: 2,
 			excludeNsfw: true,
+			includeGlobal: true,
 		}, false, true).then((notes: any[]) => {
 			notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 			const files = concat(notes.map((n: any): any[] => n.files));

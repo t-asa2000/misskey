@@ -41,7 +41,7 @@ export default Vue.extend({
 	i18n: i18n('mobile/views/pages/featured.vue'),
 	data() {
 		return {
-			includeGlobal: false,
+			includeGlobal: true,
 			mediaOnly: false,
 			sfwOnly: false,
 			nsfwOnly: false,

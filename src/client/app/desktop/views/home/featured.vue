@@ -37,7 +37,7 @@ export default Vue.extend({
 
 	data() {
 		return {
-			includeGlobal: false,
+			includeGlobal: true,
 			mediaOnly: false,
 			sfwOnly: false,
 			nsfwOnly: false,

@@ -1225,6 +1225,7 @@ desktop/views/components/timeline.vue:
   hybrid: "ソーシャル"
   hybrid-desc: "ホーム+ローカル"
   global: "グローバル"
+  reacted: "リアクション"
   mentions: "あなた宛て"
   messages: "ダイレクト投稿"
   list: "リスト"
@@ -1293,6 +1294,7 @@ desktop/views/home/featured.vue:
   days: "集計期間"
   hour: "時間"
   day: "日間"
+  years: "年間"
 
 admin/views/index.vue:
   dashboard: "ダッシュボード"
@@ -1842,6 +1844,7 @@ mobile/views/pages/featured.vue:
   days: "集計期間"
   hour: "時間"
   day: "日間"
+  years: "年間"
 
 mobile/views/pages/followers.vue:
   followers-of: "{name}のフォロワー"
@@ -1854,6 +1857,7 @@ mobile/views/pages/home.vue:
   local: "ローカル"
   hybrid: "ソーシャル"
   global: "グローバル"
+  reacted: "リアクション"
   mentions: "あなた宛て"
   messages: "ダイレクト投稿"
 
@@ -1925,6 +1929,7 @@ deck:
   hybrid: "ソーシャル"
   hashtag: "ハッシュタグ"
   global: "グローバル"
+  reacted: "リアクション"
   mentions: "あなた宛て"
   direct: "ダイレクト投稿"
   notifications: "通知"

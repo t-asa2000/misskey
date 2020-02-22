@@ -20,6 +20,7 @@ import Vue from 'vue';
 import i18n from '../../../i18n';
 import XColumnCore from './deck.column-core.vue';
 import Menu from '../../../common/views/components/menu.vue';
+import { faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 
 import { v4 as uuid } from 'uuid';
 
@@ -160,6 +161,15 @@ export default Vue.extend({
 						this.$store.commit('device/addDeckColumn', {
 							id: uuid(),
 							type: 'hybrid'
+						});
+					}
+				}, {
+					icon: faThumbsUp,
+					text: this.$t('@deck.reacted'),
+					action: () => {
+						this.$store.commit('device/addDeckColumn', {
+							id: uuid(),
+							type: 'hot'
 						});
 					}
 				}, {
@@ -312,7 +322,7 @@ export default Vue.extend({
 
 		isTlColumn(id) {
 			const column = this.columns.find(c => c.id === id);
-			return ['home', 'local', 'hybrid', 'global', 'list', 'hashtag', 'mentions', 'direct'].includes(column.type);
+			return ['home', 'local', 'hybrid', 'hot', 'global', 'list', 'hashtag', 'mentions', 'direct'].includes(column.type);
 		}
 	}
 });

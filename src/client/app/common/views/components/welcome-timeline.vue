@@ -89,7 +89,6 @@ export default Vue.extend({
 			overflow-wrap break-word
 			font-size .9em
 			color var(--noteText)
-			border-bottom 1px solid var(--faceDivider)
 
 			&:after
 				content ""

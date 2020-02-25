@@ -7,8 +7,6 @@
 		<template v-else><fa :icon="['far', 'moon']"/></template>
 	</button>
 
-	<mk-forkit class="forkit"/>
-
 	<main>
 		<div class="body">
 			<div class="main block">
@@ -319,11 +317,6 @@ export default Vue.extend({
 			height 100px
 			background linear-gradient(transparent, var(--bg))
 
-	> .forkit
-		position absolute
-		top 0
-		right 0
-
 	> button
 		position fixed
 		z-index 1
@@ -335,7 +328,7 @@ export default Vue.extend({
 
 	> main
 		margin 0 auto
-		padding 64px
+		padding 32px 64px
 		width 100%
 		max-width 1200px
 
@@ -349,7 +342,6 @@ export default Vue.extend({
 				padding 0 16px
 				line-height 48px
 				background var(--faceHeader)
-				box-shadow 0 1px 0px rgba(0, 0, 0, 0.1)
 
 				& + div
 					max-height calc(100% - 48px)
@@ -367,6 +359,7 @@ export default Vue.extend({
 			> .main
 				grid-row 1
 				grid-column 1 / 3
+				border-radius 6px
 
 				> div
 					padding 32px
@@ -422,6 +415,7 @@ export default Vue.extend({
 			> .announcements
 				grid-row 2
 				grid-column 1
+				border-radius 6px
 
 				> div
 					padding 32px
@@ -438,6 +432,7 @@ export default Vue.extend({
 			> .photos
 				grid-row 2
 				grid-column 2
+				border-radius 6px
 
 				> div
 					display grid
@@ -455,6 +450,7 @@ export default Vue.extend({
 			> .tag-cloud
 				grid-row 3
 				grid-column 1 / 3
+				border-radius 6px
 
 				> div
 					height 256px
@@ -467,6 +463,7 @@ export default Vue.extend({
 				grid-row 4
 				grid-column 1 / 3
 				font-size 14px
+				border-radius 6px
 
 			> .side
 				display grid
@@ -480,15 +477,18 @@ export default Vue.extend({
 					grid-row 1
 					grid-column 1
 					overflow auto
+					border-radius 6px
 
 				> .trends
 					grid-row 2
 					grid-column 1
 					padding 8px
+					border-radius 6px
 
 				> .info
 					grid-row 3
 					grid-column 1
+					border-radius 6px
 
 					> div
 						padding 16px

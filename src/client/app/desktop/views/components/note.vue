@@ -26,7 +26,7 @@
 						<span v-if="appearNote.isHidden" style="opacity: 0.5">{{ $t('private') }}</span>
 						<a class="reply" v-if="appearNote.reply"><fa icon="reply"/></a>
 						<mfm v-if="appearNote.text" :text="appearNote.text" :author="appearNote.user" :i="$store.state.i" :custom-emojis="appearNote.emojis"
-							:style="{ 'font-size': appearNote.text && appearNote.text.length > 160 ? '11px' : 'inherit' }"/>
+							:style="{ 'font-size': appearNote.text && appearNote.text.length > 250 ? '11px' : 'inherit' }"/>
 						<a class="rp" v-if="appearNote.renote">RN:</a>
 					</div>
 					<div class="files" v-if="appearNote.files.length > 0">
@@ -172,7 +172,6 @@ export default Vue.extend({
 	margin 0
 	padding 0
 	overflow hidden
-	border-bottom solid var(--lineWidth) var(--faceDivider)
 
 	&.mini
 		font-size 13px

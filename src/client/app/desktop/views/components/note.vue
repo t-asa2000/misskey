@@ -26,7 +26,7 @@
 						<span v-if="appearNote.isHidden" style="opacity: 0.5">{{ $t('private') }}</span>
 						<a class="reply" v-if="appearNote.reply"><fa icon="reply"/></a>
 						<mfm v-if="appearNote.text" :text="appearNote.text" :author="appearNote.user" :i="$store.state.i" :custom-emojis="appearNote.emojis"
-							:style="{ 'font-size': appearNote.text && appearNote.text.length > 250 ? '11px' : 'inherit' }"/>
+							:style="{ 'font-size': appearNote.text && appearNote.text.length > 500 ? '11px' : 'inherit' }"/>
 						<a class="rp" v-if="appearNote.renote">RN:</a>
 					</div>
 					<div class="files" v-if="appearNote.files.length > 0">
@@ -213,7 +213,7 @@ export default Vue.extend({
 
 	> .article
 		display flex
-		padding 28px 32px 18px 32px
+		padding 22px 32px 14px 32px
 
 		&:hover
 			> .main > footer > button
@@ -233,9 +233,6 @@ export default Vue.extend({
 		> .main
 			flex 1
 			min-width 0
-
-			> .header
-				margin-bottom 4px
 
 			> .body
 
@@ -259,12 +256,12 @@ export default Vue.extend({
 						padding 0
 						overflow-wrap break-word
 						color var(--noteText)
-						font-size 1em
+						font-size 0.9em
 
 						&.scroll
 							max-height 200px
 							overflow hidden auto
-							padding 0.5em 0em 0.5em 0.5em
+							padding-left 0.2em
 
 						> .reply
 							margin-right 8px
@@ -294,12 +291,12 @@ export default Vue.extend({
 						font-size 80%
 
 					> .renote
-						margin 8px 0
+						margin 0.3em 0.6em
+						opacity 0.9
 
 						> *
-							padding 16px
-							border dashed var(--lineWidth) var(--quoteBorder)
-							border-radius 8px
+							padding 0.7em
+							border-left 3px solid var(--mfmQuoteLine)
 
 			> .footer
 				> .time, .visibility-info, .app

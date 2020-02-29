@@ -101,7 +101,8 @@ export default Vue.extend({
 			excludeSfw: this.nsfwMediaOnly,
 			includeMyRenotes: this.$store.state.settings.showMyRenotes,
 			includeRenotedMyNotes: this.$store.state.settings.showRenotedMyNotes,
-			includeLocalRenotes: this.$store.state.settings.showLocalRenotes
+			includeLocalRenotes: this.$store.state.settings.showLocalRenotes,
+			excludeForeignReply: this.$store.state.settings.excludeForeignReply,
 		}).then(notes => {
 			if (notes.length == fetchLimit + 1) {
 				notes.pop();
@@ -128,7 +129,7 @@ export default Vue.extend({
 		}
 
 		this.$root.getMeta().then(meta => {
-			this.disabled = !this.$store.state.i.isModerator && !this.$store.state.i.isAdmin && (
+			this.disabled = (
 				meta.disableLocalTimeline && ['local', 'hybrid'].includes(this.src) ||
 				meta.disableGlobalTimeline && ['global'].includes(this.src));
 		});

@@ -9,11 +9,9 @@ import { isSelfHost } from '../../../../misc/convert-host';
 import Following from '../../../../models/following';
 import { oidEquals, oidIncludes } from '../../../../prelude/oid';
 import UserFilter from '../../../../models/user-filter';
-import { ILocalUser } from '../../../../models/user';
 
 export default class extends Channel {
 	public readonly chName = 'homeTimeline';
-	public static shouldShare = true;
 	public static requireCredential = true;
 
 	private mutedUserIds: string[] = [];
@@ -32,8 +30,7 @@ export default class extends Channel {
 			followerId: this.user._id
 		});
 
-		// TODO: clientSettingsをサーバーで見るのはイレギュラーらしいが
-		this.excludeForeignReply = !!(this.user as ILocalUser).clientSettings?.excludeForeignReply;
+		this.excludeForeignReply = !!params?.excludeForeignReply;
 
 		this.followingIds = followings.map(x => `${x.followeeId}`);
 

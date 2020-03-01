@@ -7,7 +7,7 @@ import fetchMeta from '../../../../misc/fetch-meta';
 import User from '../../../../models/user';
 
 export default class extends Channel {
-	public readonly chName = 'globalTimeline';
+	public readonly chName = 'locaoTimeline';
 	public static requireCredential = false;
 
 	private showReplayInPublicTimeline = false;
@@ -16,7 +16,7 @@ export default class extends Channel {
 	@autobind
 	public async init(params: any) {
 		const meta = await fetchMeta();
-		if (meta.disableGlobalTimeline) {
+		if (meta.disableLocalTimeline) {
 			return;
 		}
 		this.showReplayInPublicTimeline = meta.showReplayInPublicTimeline;
@@ -24,8 +24,8 @@ export default class extends Channel {
 		// Subscribe events
 		this.subscriber.on('notesStream', this.onNote);
 
-		const mute = await Mute.find({ muterId: this.user._id });
-		this.mutedUserIds = mute.map(m => m.muteeId.toString());
+		const mute = this.user ? await Mute.find({ muterId: this.user._id }) : null;
+		this.mutedUserIds = mute ? mute.map(m => m.muteeId.toString()) : [];
 
 		const silences = await User.find({
 			isSilenced: true,
@@ -37,7 +37,9 @@ export default class extends Channel {
 
 	@autobind
 	private async onNote(note: any) {
+		if (!note.localOnly) return;
 		if (note.visibility !== 'public') return;
+		if (note.user.host != null) return;
 		if (!this.showReplayInPublicTimeline && note.replyId) return;
 
 		// Renoteなら再pack

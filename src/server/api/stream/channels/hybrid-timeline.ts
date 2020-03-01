@@ -7,14 +7,13 @@ import fetchMeta from '../../../../misc/fetch-meta';
 import UserList from '../../../../models/user-list';
 import { concat } from '../../../../prelude/array';
 import { isSelfHost } from '../../../../misc/convert-host';
-import User, { ILocalUser } from '../../../../models/user';
+import User from '../../../../models/user';
 import Following from '../../../../models/following';
 import { oidEquals, oidIncludes } from '../../../../prelude/oid';
 import UserFilter from '../../../../models/user-filter';
 
 export default class extends Channel {
 	public readonly chName = 'hybridTimeline';
-	public static shouldShare = true;
 	public static requireCredential = true;
 
 	private mutedUserIds: string[] = [];
@@ -38,8 +37,7 @@ export default class extends Channel {
 
 		this.followingIds = followings.map(x => `${x.followeeId}`);
 
-		// TODO: clientSettingsをサーバーで見るのはイレギュラーらしいが
-		this.excludeForeignReply = !!(this.user as ILocalUser).clientSettings?.excludeForeignReply;
+		this.excludeForeignReply = !!params?.excludeForeignReply;
 
 		const mute = await Mute.find({ muterId: this.user._id });
 		this.mutedUserIds = mute.map(m => m.muteeId.toString());

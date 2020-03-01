@@ -70,7 +70,7 @@ export default Vue.extend({
 			const onChangeFollowing = () => {
 				this.fetch();
 			};
-			this.connection = this.$root.stream.useSharedConnection('homeTimeline');
+			this.connection = this.$root.stream.connectToChannel('homeTimeline', { excludeForeignReply: this.$store.state.settings.excludeForeignReply });
 			this.connection.on('note', prepend);
 			this.connection.on('follow', onChangeFollowing);
 			this.connection.on('unfollow', onChangeFollowing);
@@ -78,9 +78,13 @@ export default Vue.extend({
 			this.endpoint = 'notes/local-timeline';
 			this.connection = this.$root.stream.useSharedConnection('localTimeline');
 			this.connection.on('note', prepend);
+		} else if (this.src == 'locao') {
+			this.endpoint = 'notes/locao-timeline';
+			this.connection = this.$root.stream.useSharedConnection('locaoTimeline');
+			this.connection.on('note', prepend);
 		} else if (this.src == 'hybrid') {
 			this.endpoint = 'notes/hybrid-timeline';
-			this.connection = this.$root.stream.useSharedConnection('hybridTimeline');
+			this.connection = this.$root.stream.connectToChannel('hybridTimeline', { excludeForeignReply: this.$store.state.settings.excludeForeignReply });
 			this.connection.on('note', prepend);
 		} else if (this.src == 'hot') {
 			this.endpoint = 'notes/hot-timeline';

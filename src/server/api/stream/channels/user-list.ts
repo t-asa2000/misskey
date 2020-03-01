@@ -7,12 +7,10 @@ import UserList, { IUserList } from '../../../../models/user-list';
 import config from '../../../../config';
 import UserFilter from '../../../../models/user-filter';
 import { oidIncludes, oidEquals } from '../../../../prelude/oid';
-import { ILocalUser } from '../../../../models/user';
 import Following from '../../../../models/following';
 
 export default class extends Channel {
 	public readonly chName = 'userList';
-	public static shouldShare = false;
 	public static requireCredential = false;
 	private listId: string;
 	public list: IUserList = null;
@@ -38,8 +36,7 @@ export default class extends Channel {
 
 		this.followingIds = followings.map(x => `${x.followeeId}`);
 
-		// TODO: clientSettingsをサーバーで見るのはイレギュラーらしいが
-		this.excludeForeignReply = !!(this.user as ILocalUser).clientSettings?.excludeForeignReply;
+		this.excludeForeignReply = !!params?.excludeForeignReply;
 
 		// Subscribe stream
 		if (this.list) {

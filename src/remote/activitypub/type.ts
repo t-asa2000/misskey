@@ -27,6 +27,7 @@ export interface IObject {
 	sensitive?: boolean;
 	movedTo?: ApObject;
 	alsoKnownAs?: ApObject;
+	href?: string;
 }
 
 /**
@@ -164,6 +165,7 @@ export const isImage = (object: IObject): object is IApImage =>
 export interface IApPropertyValue extends IObject {
 	type: 'PropertyValue';
 	identifier: IApPropertyValue;
+	name: string;
 	value: string;
 }
 
@@ -173,8 +175,18 @@ export const isPropertyValue = (object: IObject): object is IApPropertyValue =>
 	typeof object.name === 'string' &&
 	typeof (object as any).value === 'string';
 
+export interface IApMention extends IObject {
+	type: 'Mention';
+	href: string;
+}
+
+export const isMention = (object: IObject): object is IApMention =>
+	object.type === 'Mention' &&
+	typeof object.href === 'string';
+
 export interface IApHashtag extends IObject {
 	type: 'Hashtag';
+	name: string;
 }
 
 export const isHashtag = (object: IObject): object is IApHashtag =>
@@ -203,7 +215,6 @@ export const isActor = (object: IObject): object is IApPerson =>
 
 export interface IApEmoji extends IObject {
 	type: 'Emoji';
-	name: string;
 	updated: Date;
 }
 
@@ -278,6 +289,10 @@ export interface IBlock extends IActivity {
 	type: 'Block';
 }
 
+export interface IFlag extends IActivity {
+	type: 'Flag';
+}
+
 export const isCreate = (object: IObject): object is ICreate => object.type === 'Create';
 export const isDelete = (object: IObject): object is IDelete => object.type === 'Delete';
 export const isUpdate = (object: IObject): object is IUpdate => object.type === 'Update';
@@ -291,3 +306,4 @@ export const isRemove = (object: IObject): object is IRemove => object.type === 
 export const isLike = (object: IObject): object is ILike => object.type === 'Like' || object.type === 'EmojiReaction' || object.type === 'EmojiReact';
 export const isAnnounce = (object: IObject): object is IAnnounce => object.type === 'Announce';
 export const isBlock = (object: IObject): object is IBlock => object.type === 'Block';
+export const isFlag = (object: IObject): object is IFlag => object.type === 'Flag';

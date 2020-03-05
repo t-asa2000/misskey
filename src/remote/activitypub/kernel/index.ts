@@ -1,4 +1,4 @@
-import { isCreate, isDelete, isUpdate, isRead, isFollow, isAccept, isReject, isAdd, isRemove, isAnnounce, isLike, isUndo, isBlock, isCollectionOrOrderedCollection, isCollection, IObject } from '../type';
+import { isCreate, isDelete, isUpdate, isRead, isFollow, isAccept, isReject, isAdd, isRemove, isAnnounce, isLike, isUndo, isBlock, isFlag, isCollectionOrOrderedCollection, isCollection, IObject } from '../type';
 import { IRemoteUser } from '../../../models/user';
 import create from './create';
 import performDeleteActivity from './delete';
@@ -13,11 +13,12 @@ import reject from './reject';
 import add from './add';
 import remove from './remove';
 import block from './block';
+import flag from './flag';
 import { apLogger } from '../logger';
 import Resolver from '../resolver';
 import { toArray } from '../../../prelude/array';
 
-export async function performActivity(actor: IRemoteUser, activity: IObject) {
+export async function performActivity(actor: IRemoteUser, activity: IObject): Promise<string> {
 	if (isCollectionOrOrderedCollection(activity)) {
 		const resolver = new Resolver();
 		for (const item of toArray(isCollection(activity) ? activity.items : activity.orderedItems)) {
@@ -30,12 +31,13 @@ export async function performActivity(actor: IRemoteUser, activity: IObject) {
 				continue;
 			}
 		}
+		return `ok: collection activity completed`;
 	} else {
 		return await performOneActivity(actor, activity);
 	}
 }
 
-export async function performOneActivity(actor: IRemoteUser, activity: IObject) {
+export async function performOneActivity(actor: IRemoteUser, activity: IObject): Promise<string> {
 	if (actor.isSuspended) return 'skip: actor is suspended';
 
 	if (isCreate(activity)) {
@@ -53,9 +55,9 @@ export async function performOneActivity(actor: IRemoteUser, activity: IObject) 
 	} else if (isReject(activity)) {
 		return await reject(actor, activity);
 	} else if (isAdd(activity)) {
-		return await add(actor, activity).catch(err => apLogger.error(err));
+		return await add(actor, activity);
 	} else if (isRemove(activity)) {
-		return await remove(actor, activity).catch(err => apLogger.error(err));
+		return await remove(actor, activity);
 	} else if (isAnnounce(activity)) {
 		return await announce(actor, activity);
 	} else if (isLike(activity)) {
@@ -64,6 +66,8 @@ export async function performOneActivity(actor: IRemoteUser, activity: IObject) 
 		return await undo(actor, activity);
 	} else if (isBlock(activity)) {
 		return await block(actor, activity);
+	} else if (isFlag(activity)) {
+		return await flag(actor, activity);
 	} else {
 		return `skip: unknown activity type: ${(activity as any).type}`;
 	}

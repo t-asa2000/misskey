@@ -1,7 +1,7 @@
 {
 	"name": "misskey",
 	"author": "syuilo <syuilotan@yahoo.co.jp>",
-	"version": "10.102.182-one",
+	"version": "10.102.185-one",
 	"codename": "nighthike",
 	"repository": {
 		"type": "git",
@@ -23,7 +23,8 @@
 		"format": "gulp format"
 	},
 	"resolutions": {
-		"dot-prop": "5.2.0"
+		"lodash": "^4.17.13",
+		"dot-prop": "^5.2.0"
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-svg-core": "1.2.27",
@@ -61,7 +62,7 @@
 		"@types/koa__cors": "3.0.1",
 		"@types/lodash": "4.14.149",
 		"@types/mocha": "7.0.2",
-		"@types/mongodb": "3.5.1",
+		"@types/mongodb": "3.5.2",
 		"@types/node": "13.7.7",
 		"@types/nodemailer": "6.4.0",
 		"@types/nprogress": "0.2.0",
@@ -96,7 +97,7 @@
 		"autobind-decorator": "2.4.0",
 		"autosize": "4.0.2",
 		"autwh": "0.1.0",
-		"aws-sdk": "2.633.0",
+		"aws-sdk": "2.634.0",
 		"bcryptjs": "2.4.3",
 		"bootstrap-vue": "2.6.0",
 		"bull": "3.13.0",
@@ -132,7 +133,7 @@
 		"html-minifier": "4.0.0",
 		"htmlescape": "1.1.1",
 		"http-signature": "1.3.2",
-		"https-proxy-agent": "4.0.0",
+		"https-proxy-agent": "5.0.0",
 		"insert-text-at-cursor": "0.3.0",
 		"is-svg": "4.2.1",
 		"js-yaml": "3.13.1",
@@ -214,7 +215,7 @@
 		"v-animate-css": "0.0.3",
 		"v-debounce": "0.1.2",
 		"vue": "2.6.11",
-		"vue-color": "2.7.0",
+		"vue-color": "2.7.1",
 		"vue-content-loading": "1.6.0",
 		"vue-i18n": "8.15.4",
 		"vue-js-modal": "1.3.33",

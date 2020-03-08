@@ -131,7 +131,7 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
 
 	// 添付ファイル
 	// Noteがsensitiveなら添付もsensitiveにする
-	const limit = promiseLimit(2);
+	const limit = promiseLimit(4);
 
 	note.attachment = toArray(note.attachment);
 	const files = note.attachment
@@ -162,7 +162,8 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
 			}
 
 			logger.warn(`Error in inReplyTo ${note.inReplyTo} - ${e.statusCode || e}`);
-			throw e;
+			//throw e;
+			return null;
 		})
 		: null;
 

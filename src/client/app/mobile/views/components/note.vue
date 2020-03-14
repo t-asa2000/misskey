@@ -143,6 +143,7 @@ export default Vue.extend({
 .note
 	overflow hidden
 	font-size 13px
+	box-shadow 0 1px 8px rgba(0, 0, 0, 0.2)
 
 	&:last-of-type
 		border-bottom none
@@ -188,7 +189,7 @@ export default Vue.extend({
 
 	> .article
 		display flex
-		padding 16px 16px 9px
+		padding 12px 12px 6px
 
 		> .avatar
 			flex-shrink 0

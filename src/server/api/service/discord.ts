@@ -106,14 +106,10 @@ router.get('/signin/discord', async ctx => {
 		response_type: 'code'
 	};
 
-	const expires = 1000 * 60 * 60; // 1h
-	ctx.cookies.set('signin_with_discord_session_id', sessid, {
+	ctx.cookies.set('signin_with_discord_sid', sessid, {
 		path: '/',
-		domain: config.host,
 		secure: config.url.startsWith('https'),
-		httpOnly: true,
-		expires: new Date(Date.now() + expires),
-		maxAge: expires
+		httpOnly: true
 	});
 
 	redis.set(sessid, JSON.stringify(params));
@@ -128,7 +124,7 @@ router.get('/dc/cb', async ctx => {
 	const oauth2 = await getOAuth2();
 
 	if (!userToken) {
-		const sessid = ctx.cookies.get('signin_with_discord_session_id');
+		const sessid = ctx.cookies.get('signin_with_discord_sid');
 
 		if (!sessid) {
 			ctx.throw(400, 'invalid session');
@@ -208,6 +204,7 @@ router.get('/dc/cb', async ctx => {
 		}, {
 			$set: {
 				discord: {
+					id,
 					accessToken,
 					refreshToken,
 					expiresDate,

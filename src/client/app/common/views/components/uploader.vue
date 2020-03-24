@@ -23,6 +23,7 @@
 import Vue from 'vue';
 import i18n from '../../../i18n';
 import { apiUrl } from '../../../config';
+import { readAndCompressImage } from 'browser-image-resizer';
 
 export default Vue.extend({
 	i18n: i18n('common/views/components/uploader.vue'),
@@ -32,67 +33,66 @@ export default Vue.extend({
 		};
 	},
 	methods: {
-		checkExistence(fileData: ArrayBuffer): Promise<any> {
-			return new Promise((resolve, reject) => {
-				resolve(null);
-			});
-		},
-
-		upload(file: File, folder: any, name?: string, useJpeg = false) {
+		async upload(file: File, folder: any, name?: string, useJpeg = false, clientResize = false) {
 			if (folder && typeof folder == 'object') folder = folder.id;
-
 			const id = Math.random();
+			name = name || file.name || 'untitled';
 
-			const reader = new FileReader();
-			reader.onload = (e: any) => {
-				this.checkExistence(e.target.result).then(result => {
-					if (result !== null) {
-						this.$emit('uploaded', result);
-						return;
-					}
+			let resizedImage: any;
+			if ((file.type === 'image/jpeg' && clientResize && !this.$store.state.settings.disableClientImageResizing) || (useJpeg && file.type === 'image/png')) {
+				const config = {
+					quality: 0.85,
+					maxWidth: 2048,
+					maxHeight: 2048,
+					autoRotate: true,
+					debug: true
+				};
+				resizedImage = await readAndCompressImage(file, config)
 
-					const ctx = {
-						id: id,
-						name: name || file.name || 'untitled',
-						progress: undefined,
-						img: window.URL.createObjectURL(file)
-					};
-
-					this.uploads.push(ctx);
-					this.$emit('change', this.uploads);
-
-					const data = new FormData();
-					data.append('i', this.$store.state.i.token);
-					data.append('force', 'true');
-					data.append('useJpegForWeb', `${useJpeg}`);
-					data.append('file', file);
-
-					if (folder) data.append('folderId', folder);
-					if (name) data.append('name', name);
-
-					const xhr = new XMLHttpRequest();
-					xhr.open('POST', apiUrl + '/drive/files/create', true);
-					xhr.onload = (e: any) => {
-						const driveFile = JSON.parse(e.target.response);
-
-						this.$emit('uploaded', driveFile);
-
-						this.uploads = this.uploads.filter(x => x.id != id);
-						this.$emit('change', this.uploads);
-					};
-
-					xhr.upload.onprogress = e => {
-						if (e.lengthComputable) {
-							if (ctx.progress == undefined) ctx.progress = {};
-							ctx.progress.max = e.total;
-							ctx.progress.value = e.loaded;
-						}
-					};
-
-					xhr.send(data);
-				})
+				name = name.replace(/\.png/, '.jpg');
 			}
-			reader.readAsArrayBuffer(file);
+
+			const ctx = {
+				id,
+				name,
+				progress: undefined,
+				img: window.URL.createObjectURL(file)
+			};
+
+			this.uploads.push(ctx);
+			this.$emit('change', this.uploads);
+
+			const data = new FormData();
+			data.append('i', this.$store.state.i.token);
+			data.append('force', 'true');
+			data.append('isWebpublic', `${!!resizedImage}`);
+			data.append('file', resizedImage || file);
+
+			if (folder) data.append('folderId', folder);
+			if (name) data.append('name', name);
+
+			const xhr = new XMLHttpRequest();
+			xhr.open('POST', apiUrl + '/drive/files/create', true);
+			xhr.onload = (e: any) => {
+				const driveFile = JSON.parse(e.target.response);
+
+				this.$emit('uploaded', driveFile);
+
+				this.uploads = this.uploads.filter(x => x.id != id);
+				this.$emit('change', this.uploads);
+			};
+
+			xhr.upload.onprogress = e => {
+				if (e.lengthComputable) {
+					if (ctx.progress == undefined) ctx.progress = {};
+					ctx.progress.max = e.total;
+					ctx.progress.value = e.loaded;
+				}
+			};
+
+			xhr.send(data);
+
+
 		}
 	}
 });

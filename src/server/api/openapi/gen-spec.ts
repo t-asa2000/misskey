@@ -2,7 +2,8 @@ import endpoints from '../endpoints';
 import { Context } from 'cafy';
 import config from '../../../config';
 import { errors as basicErrors } from './errors';
-import { schemas, convertSchemaToOpenApiSchema } from './schemas';
+import { schemas } from './schemas';
+import { convertOpenApiSchema } from '../../../misc/schema';
 import { getDescription } from './description';
 import { repositoryUrl } from '../../../const.json';
 
@@ -80,7 +81,7 @@ export function genOpenapiSpec(lang = 'ja-JP') {
 		};
 	}
 
-	for (const endpoint of endpoints.filter(ep => !ep.meta.secure)) {
+	for (const endpoint of endpoints.filter(ep => !ep.meta.secure && !ep.name.startsWith('admin/'))) {
 		const porops = {} as any;
 		const errors = {} as any;
 
@@ -112,7 +113,7 @@ export function genOpenapiSpec(lang = 'ja-JP') {
 			properties: endpoint.meta.params ? genProps(porops) : {}
 		};
 
-		const resSchema = endpoint.meta.res ? convertSchemaToOpenApiSchema(endpoint.meta.res) : {};
+		const resSchema = endpoint.meta.res ? convertOpenApiSchema(endpoint.meta.res) : {};
 
 		let desc = (endpoint.meta.desc ? endpoint.meta.desc[lang] : 'No description provided.') + '\n\n';
 		desc += `**Credential required**: *${endpoint.meta.requireCredential ? 'Yes' : 'No'}*`;
@@ -147,7 +148,7 @@ export function genOpenapiSpec(lang = 'ja-JP') {
 				url: `${repositoryUrl}/src/server/api/endpoints/${endpoint.name}.ts`
 			},
 			...(endpoint.meta.tags ? {
-				tags: endpoint.meta.tags
+				tags: [endpoint.meta.tags[0]]
 			} : {}),
 			...(endpoint.meta.requireCredential ? {
 				security: [{
@@ -185,63 +186,6 @@ export function genOpenapiSpec(lang = 'ja-JP') {
 								$ref: '#/components/schemas/Error'
 							},
 							examples: { ...errors, ...basicErrors['400'] }
-						}
-					}
-				},
-				'401': {
-					description: 'Authentication error',
-					content: {
-						'application/json': {
-							schema: {
-								$ref: '#/components/schemas/Error'
-							},
-							examples: basicErrors['401']
-						}
-					}
-				},
-				'403': {
-					description: 'Forbiddon error',
-					content: {
-						'application/json': {
-							schema: {
-								$ref: '#/components/schemas/Error'
-							},
-							examples: basicErrors['403']
-						}
-					}
-				},
-				'418': {
-					description: 'I\'m Ai',
-					content: {
-						'application/json': {
-							schema: {
-								$ref: '#/components/schemas/Error'
-							},
-							examples: basicErrors['418']
-						}
-					}
-				},
-				...(endpoint.meta.limit ? {
-					'429': {
-						description: 'To many requests',
-						content: {
-							'application/json': {
-								schema: {
-									$ref: '#/components/schemas/Error'
-								},
-								examples: basicErrors['429']
-							}
-						}
-					}
-				} : {}),
-				'500': {
-					description: 'Internal server error',
-					content: {
-						'application/json': {
-							schema: {
-								$ref: '#/components/schemas/Error'
-							},
-							examples: basicErrors['500']
 						}
 					}
 				},

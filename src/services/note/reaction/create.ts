@@ -9,11 +9,12 @@ import { renderLike } from '../../../remote/activitypub/renderer/like';
 import { deliverToUser, deliverToFollowers } from '../../../remote/activitypub/deliver-manager';
 import { renderActivity } from '../../../remote/activitypub/renderer';
 import perUserReactionsChart from '../../../services/chart/per-user-reactions';
-import { toDbReaction } from '../../../misc/reaction-lib';
+import { toDbReaction, decodeReaction } from '../../../misc/reaction-lib';
 import deleteReaction from './delete';
+import packEmojis from '../../../misc/pack-emojis';
 
 export default async (user: IUser, note: INote, reaction: string) => {
-	reaction = await toDbReaction(reaction);
+	reaction = await toDbReaction(reaction, true, user.host);
 
 	const exist = await NoteReaction.findOne({
 		noteId: note._id,
@@ -46,8 +47,12 @@ export default async (user: IUser, note: INote, reaction: string) => {
 
 	perUserReactionsChart.update(user, note);
 
+	const decodedReaction = decodeReaction(reaction, note._user.host).replace(/:/g, '');
+	const emoji = (await packEmojis([decodedReaction], note._user.host))[0];
+
 	publishNoteStream(note._id, 'reacted', {
 		reaction: reaction,
+		emoji: emoji,
 		userId: user._id
 	});
 

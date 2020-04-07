@@ -101,6 +101,7 @@ export default prop => ({
 					if (body.userId == this.$store.state.i.id) {
 						Vue.set(this.$_ns_target, 'myReaction', reaction);
 					}
+
 					break;
 				}
 

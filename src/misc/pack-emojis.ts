@@ -19,36 +19,18 @@ type IREmoji = {
 	resolvable: string,
 };
 
-/**
- * 絵文字クエリオプション
- */
-type EmojiOptions = {
-	/**
-	 * カスタム絵文字を許可する
-	 */
-	custom: boolean;
-
-	/**
-	 * アバター絵文字を許可する
-	 */
-	avatar: boolean;
-
-	/**
-	 * 外部ホスト指定を許可する
-	 */
-	foreign: boolean;
-};
+const SELF_HOST: string = null;
 
 /**
  * 絵文字クエリ
  * @param emojis 絵文字名一覧
  * @param ownerHost 投稿またはプロフィール所有者のホスト
- * @param opt オプション
+ * @param reactionEmojis リアクションの絵文字名一覧
  */
-export default async function(emojis: string[], ownerHost: string, opt: EmojiOptions = { custom: true, avatar: true, foreign: true }, reactionEmojis = [] as string[]) {
+export async function packEmojis(emojis: string[], ownerHost: string, reactionEmojis = [] as string[]) {
 	const [custom, avatar] = await Promise.all([
-		opt.custom ? packCustomEmojis(emojis, ownerHost, opt.foreign, reactionEmojis) : [],
-		opt.avatar ? packAvatarEmojis(emojis, ownerHost, opt.foreign) : []
+		packCustomEmojis(emojis, ownerHost, true, reactionEmojis),
+		packAvatarEmojis(emojis, ownerHost, true)
 	]);
 
 	return custom.concat(avatar);
@@ -66,8 +48,8 @@ export async function packAvatarEmojis(emojis: string[], ownerHost: string, fore
 			const match = foreign ? name.match(/^@([\w-]+)(?:@([\w.-]+))?$/) : name.match(/^@([\w-]+)$/);
 			if (!match) return null;
 
-			let queryHost = foreign ? match[2] || ownerHost || null : null;
-			if (isSelfHost(queryHost)) queryHost = null;
+			let queryHost = foreign ? match[2] || (ownerHost || SELF_HOST) : SELF_HOST;
+			if (isSelfHost(queryHost)) queryHost = SELF_HOST;
 
 			return {
 				emoji: match[0],
@@ -98,8 +80,6 @@ export async function packAvatarEmojis(emojis: string[], ownerHost: string, fore
 
 	return avatarEmojis;
 }
-
-const SELF_HOST: string = null;
 
 /**
  * Pack custom emojis

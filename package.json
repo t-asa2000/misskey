@@ -1,7 +1,7 @@
 {
 	"name": "misskey",
 	"author": "syuilo <syuilotan@yahoo.co.jp>",
-	"version": "10.102.206-m544",
+	"version": "10.102.209-one",
 	"codename": "nighthike",
 	"repository": {
 		"type": "git",
@@ -35,7 +35,7 @@
 		"@prezzemolo/rap": "0.1.2",
 		"@prezzemolo/zip": "0.0.3",
 		"@types/bcryptjs": "2.4.2",
-		"@types/bull": "3.12.1",
+		"@types/bull": "3.12.2",
 		"@types/dateformat": "3.0.1",
 		"@types/double-ended-queue": "2.1.1",
 		"@types/elasticsearch": "5.0.36",
@@ -62,7 +62,7 @@
 		"@types/lodash": "4.14.149",
 		"@types/mocha": "7.0.2",
 		"@types/mongodb": "3.5.5",
-		"@types/node": "13.11.0",
+		"@types/node": "13.11.1",
 		"@types/node-fetch": "2.5.5",
 		"@types/nodemailer": "6.4.0",
 		"@types/nprogress": "0.2.0",
@@ -89,12 +89,13 @@
 		"@types/websocket": "1.0.0",
 		"@types/ws": "7.2.3",
 		"@typescript-eslint/parser": "2.27.0",
-		"animejs": "3.1.0",
+		"abort-controller": "3.0.0",
+		"animejs": "3.2.0",
 		"apexcharts": "3.15.0",
 		"autobind-decorator": "2.4.0",
 		"autosize": "4.0.2",
 		"autwh": "0.1.0",
-		"aws-sdk": "2.655.0",
+		"aws-sdk": "2.656.0",
 		"bcryptjs": "2.4.3",
 		"bootstrap-vue": "2.11.0",
 		"browser-image-resizer": "2.1.0",
@@ -196,7 +197,7 @@
 		"stylus": "0.54.7",
 		"stylus-loader": "3.0.2",
 		"summaly": "2.3.1",
-		"systeminformation": "4.23.1",
+		"systeminformation": "4.23.3",
 		"syuilo-password-strength": "0.0.1",
 		"terser-webpack-plugin": "2.3.5",
 		"textarea-caret": "3.1.0",
@@ -208,7 +209,7 @@
 		"tslint": "5.20.1",
 		"tslint-sonarts": "1.9.0",
 		"typescript": "3.8.3",
-		"url-loader": "4.0.0",
+		"url-loader": "4.1.0",
 		"uuid": "7.0.3",
 		"v-animate-css": "0.0.3",
 		"v-debounce": "0.1.2",
@@ -236,6 +237,6 @@
 		"websocket": "1.0.31",
 		"ws": "7.2.3",
 		"xev": "2.0.1",
-		"xmlbuilder": "15.1.0"
+		"xmlbuilder": "15.1.1"
 	}
 }

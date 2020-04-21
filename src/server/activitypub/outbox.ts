@@ -1,5 +1,5 @@
 import { ObjectID } from 'mongodb';
-import * as Router from 'koa-router';
+import * as Router from '@koa/router';
 import config from '../../config';
 import $ from 'cafy';
 import ID, { transform } from '../../misc/cafy-id';
@@ -16,7 +16,7 @@ import renderAnnounce from '../../remote/activitypub/renderer/announce';
 import { countIf } from '../../prelude/array';
 import * as url from '../../prelude/url';
 
-export default async (ctx: Router.IRouterContext) => {
+export default async (ctx: Router.RouterContext) => {
 	if (!ObjectID.isValid(ctx.params.user)) {
 		ctx.status = 404;
 		return;
@@ -49,7 +49,7 @@ export default async (ctx: Router.IRouterContext) => {
 		host: null
 	});
 
-	if (user === null) {
+	if (user == null) {
 		ctx.status = 404;
 		return;
 	}
@@ -130,6 +130,7 @@ export default async (ctx: Router.IRouterContext) => {
 export async function packActivity(note: INote): Promise<object> {
 	if (note.renoteId && note.text == null && note.poll == null && (note.fileIds == null || note.fileIds.length == 0)) {
 		const renote = await Note.findOne(note.renoteId);
+		if (!renote) throw new Error(`Note(${note._id}) の 対象Renote(${note.renoteId})が存在しない。DB壊れている？`);
 		return renderAnnounce(renote.uri ? renote.uri : `${config.url}/notes/${renote._id}`, note);
 	}
 

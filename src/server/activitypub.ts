@@ -1,5 +1,5 @@
 import { ObjectID } from 'mongodb';
-import * as Router from 'koa-router';
+import * as Router from '@koa/router';
 import * as json from 'koa-json-body';
 import * as httpSignature from 'http-signature';
 
@@ -25,7 +25,7 @@ const router = new Router();
 
 //#region Routing
 
-function inbox(ctx: Router.IRouterContext) {
+function inbox(ctx: Router.RouterContext) {
 	let signature;
 
 	try {
@@ -43,7 +43,7 @@ function inbox(ctx: Router.IRouterContext) {
 const ACTIVITY_JSON = 'application/activity+json; charset=utf-8';
 const LD_JSON = 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"; charset=utf-8';
 
-function isActivityPubReq(ctx: Router.IRouterContext) {
+function isActivityPubReq(ctx: Router.RouterContext) {
 	ctx.response.vary('Accept');
 	const accepted = ctx.accepts('html', ACTIVITY_JSON, LD_JSON);
 	return typeof accepted === 'string' && !accepted.match(/html/);
@@ -59,8 +59,8 @@ export function setResponseType(ctx: Router.RouterContext) {
 }
 
 // inbox
-router.post('/inbox', json(), inbox);
-router.post('/users/:user/inbox', json(), inbox);
+router.post('/inbox', json() as any, inbox);
+router.post('/users/:user/inbox', json() as any, inbox);
 
 const isNoteUserAvailable = async (note: INote) => {
 	const user = await User.findOne({
@@ -179,8 +179,8 @@ router.get('/users/:user/publickey', async ctx => {
 });
 
 // user
-async function userInfo(ctx: Router.IRouterContext, user: IUser) {
-	if (user === null) {
+async function userInfo(ctx: Router.RouterContext, user?: IUser | null) {
+	if (user == null) {
 		ctx.status = 404;
 		return;
 	}
@@ -233,7 +233,7 @@ router.get('/emojis/:emoji', async ctx => {
 		name: ctx.params.emoji
 	});
 
-	if (emoji === null) {
+	if (emoji == null) {
 		ctx.status = 404;
 		return;
 	}
@@ -262,6 +262,11 @@ router.get('/likes/:like', async ctx => {
 	const note = await Note.findOne({
 		_id: reaction.noteId
 	});
+
+	if (note == null) {
+		ctx.status = 404;
+		return;
+	}
 
 	ctx.body = renderActivity(await renderLike(reaction, note));
 	ctx.set('Cache-Control', 'public, max-age=180');

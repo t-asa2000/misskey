@@ -1,25 +1,19 @@
-import * as mongo from 'mongodb';
-import User, { IRemoteUser } from '../../../../models/user';
-import config from '../../../../config';
+import { IRemoteUser, isLocalUser } from '../../../../models/user';
 import reject from '../../../../services/following/requests/reject';
 import { IFollow } from '../../type';
+import DbResolver from '../../db-resolver';
 
 export default async (actor: IRemoteUser, activity: IFollow): Promise<string> => {
-	const id = typeof activity.actor == 'string' ? activity.actor : activity.actor.id;
+	// ※ activityはこっちから投げたフォローリクエストなので、activity.actorは存在するローカルユーザーである必要がある
 
-	if (!id.startsWith(config.url + '/')) {
-		return `skip: invalied target`;
+	const dbResolver = new DbResolver();
+	const follower = await dbResolver.getUserFromApId(activity.actor);
+
+	if (follower == null) {
+		return `skip: follower not found`;
 	}
 
-	const follower = await User.findOne({
-		_id: new mongo.ObjectID(id.split('/').pop())
-	});
-
-	if (follower === null) {
-		return `skip: follower is not found`;
-	}
-
-	if (follower.host != null) {
+	if (!isLocalUser(follower)) {
 		return `skip: follower is not a local user`;
 	}
 

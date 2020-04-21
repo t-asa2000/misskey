@@ -1,9 +1,8 @@
-import * as mongo from 'mongodb';
 import * as promiseLimit from 'promise-limit';
 
 import config from '../../../config';
 import Resolver from '../resolver';
-import Note, { INote } from '../../../models/note';
+import { INote } from '../../../models/note';
 import post from '../../../services/note/create';
 import { IPost, IObject, getOneApId, getApId, getOneApHrefNullable, isPost, isEmoji } from '../type';
 import { resolvePerson, updatePerson } from './person';
@@ -26,6 +25,7 @@ import { createMessage } from '../../../services/messages/create';
 import { isBlockedHost } from '../../../misc/instance-info';
 import { parseAudience } from '../audience';
 import MessagingMessage from '../../../models/messaging-message';
+import DbResolver from '../db-resolver';
 
 const logger = apLogger;
 
@@ -56,30 +56,15 @@ function toNote(object: IObject, uri: string): IPost {
  *
  * Misskeyに対象のNoteが登録されていればそれを返します。
  */
-export async function fetchNote(value: string | IObject, resolver?: Resolver): Promise<INote> {
-	const uri = getApId(value);
-
-	// URIがこのサーバーを指しているならデータベースからフェッチ
-	if (uri.startsWith(config.url + '/')) {
-		const id = new mongo.ObjectID(uri.split('/').pop());
-		return await Note.findOne({ _id: id });
-	}
-
-	//#region このサーバーに既に登録されていたらそれを返す
-	const exist = await Note.findOne({ uri });
-
-	if (exist) {
-		return exist;
-	}
-	//#endregion
-
-	return null;
+export async function fetchNote(object: string | IObject): Promise<INote | null> {
+	const dbResolver = new DbResolver();
+	return await dbResolver.getNoteFromApId(object);
 }
 
 /**
  * Noteを作成します。
  */
-export async function createNote(value: string | IObject, resolver?: Resolver, silent = false): Promise<INote> {
+export async function createNote(value: string | IObject, resolver?: Resolver, silent = false): Promise<INote | null> {
 	if (resolver == null) resolver = new Resolver();
 
 	const object = await resolver.resolve(value);
@@ -261,7 +246,7 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
 	}
 
 	return await post(actor, {
-		createdAt: new Date(note.published),
+		createdAt: note.published ? new Date(note.published) : undefined,
 		files,
 		reply,
 		renote: quote,

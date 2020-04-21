@@ -1,5 +1,5 @@
 import { ObjectID } from 'mongodb';
-import * as Router from 'koa-router';
+import * as Router from '@koa/router';
 import config from '../../config';
 import $ from 'cafy';
 import ID, { transform } from '../../misc/cafy-id';
@@ -12,7 +12,7 @@ import renderOrderedCollectionPage from '../../remote/activitypub/renderer/order
 import renderFollowUser from '../../remote/activitypub/renderer/follow-user';
 import { setResponseType } from '../activitypub';
 
-export default async (ctx: Router.IRouterContext) => {
+export default async (ctx: Router.RouterContext) => {
 	if (!ObjectID.isValid(ctx.params.user)) {
 		ctx.status = 404;
 		return;
@@ -42,7 +42,7 @@ export default async (ctx: Router.IRouterContext) => {
 		host: null
 	});
 
-	if (user === null) {
+	if (user == null) {
 		ctx.status = 404;
 		return;
 	}
@@ -63,7 +63,7 @@ export default async (ctx: Router.IRouterContext) => {
 		}
 
 		// Get followers
-		const followings = await Following
+		const followings = user.hideFollows ? [] : await Following
 			.find(query, {
 				limit: limit + 1,
 				sort: { _id: -1 }
@@ -91,7 +91,7 @@ export default async (ctx: Router.IRouterContext) => {
 		setResponseType(ctx);
 	} else {
 		// index page
-		const rendered = renderOrderedCollection(partOf, user.followersCount, `${partOf}?page=true`, null);
+		const rendered = renderOrderedCollection(partOf, user.followersCount, user.hideFollows ? null : `${partOf}?page=true`, null);
 		ctx.body = renderActivity(rendered);
 		ctx.set('Cache-Control', 'private, max-age=0, must-revalidate');
 		setResponseType(ctx);

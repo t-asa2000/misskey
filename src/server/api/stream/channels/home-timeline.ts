@@ -14,7 +14,6 @@ export default class extends Channel {
 	public readonly chName = 'homeTimeline';
 	public static requireCredential = true;
 
-	private mutedUserIds: string[] = [];
 	private hideFromUsers: string[] = [];
 	private hideFromHosts: string[] = [];
 	private hideRenoteUsers: string[] = [];
@@ -33,9 +32,6 @@ export default class extends Channel {
 		this.excludeForeignReply = !!params?.excludeForeignReply;
 
 		this.followingIds = followings.map(x => `${x.followeeId}`);
-
-		const mute = await Mute.find({ muterId: this.user._id });
-		this.mutedUserIds = mute.map(m => m.muteeId.toString());
 
 		// Homeから隠すリストユーザー
 		const lists = await UserList.find({

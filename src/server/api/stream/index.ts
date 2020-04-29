@@ -11,6 +11,7 @@ import Channel from './channel';
 import channels from './channels';
 import { EventEmitter } from 'events';
 import { ApiError } from '../error';
+import { getHideUserIdsById } from '../common/get-hide-users';
 
 /**
  * Main stream connection
@@ -23,6 +24,8 @@ export default class Connection {
 	private channels: Channel[] = [];
 	private subscribingNotes: any = {};
 	public sendMessageToWsOverride: any = null; // 後方互換性のため
+	public muting: string[] = [];
+	private mutingClock: any;
 
 	constructor(
 		wsConnection: websocket.connection,
@@ -36,6 +39,12 @@ export default class Connection {
 		this.subscriber = subscriber;
 
 		this.wsConnection.on('message', this.onWsConnectionMessage);
+
+		if (this.user) {
+			this.updateMuting();
+			const interval = (300 * 1000) + (Math.random() * 30 * 1000);
+			this.mutingClock = setInterval(this.updateMuting, interval);
+		}
 	}
 
 	/**
@@ -212,6 +221,12 @@ export default class Connection {
 		}
 	}
 
+	@autobind
+	private async updateMuting() {
+		const hides = await getHideUserIdsById(this.user?._id, true, false);
+		this.muting = hides.map(x => `${x}`);
+	}
+
 	/**
 	 * ストリームが切れたとき
 	 */
@@ -220,5 +235,6 @@ export default class Connection {
 		for (const c of this.channels.filter(c => c.dispose)) {
 			c.dispose();
 		}
+		if (this.mutingClock) clearInterval(this.mutingClock);
 	}
 }

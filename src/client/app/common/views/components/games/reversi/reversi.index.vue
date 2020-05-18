@@ -29,8 +29,8 @@
 		<h2>{{ $t('my-games') }}</h2>
 		<div class="games" v-for="g in myGames" :key="g.id">
 			<a class="game" tabindex="-1" @click.prevent="go(g)" :href="`/games/reversi/${g.id}`">
-				<span><b><mk-user-name :user="getOtherUser(g)"/></b></span>
 				<mk-avatar class="avatar" :user="getOtherUser(g)"/>
+				<span><b><mk-user-name :user="getOtherUser(g)"/></b></span>
 				<span class="state">{{ g.isEnded ? $t('game-state.ended') : $t('game-state.playing') }}</span>
 				<mk-time :time="g.createdAt" />
 			</a>
@@ -180,13 +180,13 @@ export default Vue.extend({
 
 		> input
 			margin 1em
-			padding 0.5em
+			padding 1em
 			font-size 16px
 			width 250px
 			color var(--inputText)
 			background var(--desktopPostFormTextareaBg)
 			border 1px solid var(--primaryAlpha01)
-			border-radius 4px
+			border-radius 8px
 
 		> details
 			margin 8px 0

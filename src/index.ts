@@ -25,17 +25,16 @@ const logger = new Logger('core', 'cyan');
 const bootLogger = logger.createSubLogger('boot', 'magenta', false);
 const clusterLogger = logger.createSubLogger('cluster', 'orange');
 const ev = new Xev();
+const workerIndex: Record<number, string> = {};
 
 /**
  * Init process
  */
 function main() {
-	process.title = `Misskey (${cluster.isMaster ? 'master' : 'worker'})`;
-
-	if (program.onlyQueue) {
-		queueMain();
-		return;
-	}
+	process.title = `Misskey (${cluster.isMaster ? 'master'
+		: process.env.WORKER_TYPE === 'server' ? 'server'
+		: process.env.WORKER_TYPE === 'queue' ? 'queue'
+		: 'worker'})`;
 
 	if (cluster.isMaster || program.disableClustering) {
 		masterMain();
@@ -101,7 +100,7 @@ async function masterMain() {
 	bootLogger.succ('Misskey initialized');
 
 	if (!program.disableClustering) {
-		await spawnWorkers(config.clusterLimit);
+		await spawnWorkers(config);
 	}
 
 	bootLogger.succ(`Now listening on port ${config.port} on ${config.url}`, null, true);
@@ -111,35 +110,21 @@ async function masterMain() {
  * Init worker process
  */
 async function workerMain() {
-	// start server
-	await require('./server').default();
+	const workerType = process.env.WORKER_TYPE;
 
-	// start job queue
-	require('./queue').default();
+	if (workerType === 'server') {
+		await require('./server').default();
+	} else if (workerType === 'queue') {
+		require('./queue').default();
+	} else {
+		await require('./server').default();
+		require('./queue').default();
+	}
 
 	if (cluster.isWorker) {
 		// Send a 'ready' message to parent process
 		process.send('ready');
 	}
-}
-
-async function queueMain() {
-	try {
-		// initialize app
-		const config = await init();
-
-		greet(config);
-	} catch (e) {
-		bootLogger.error('Fatal error occurred during initialization', null, true);
-		process.exit(1);
-	}
-
-	bootLogger.succ('Misskey initialized');
-
-	// start processor
-	require('./queue').default();
-
-	bootLogger.succ('Queue started', null, true);
 }
 
 const runningNodejsVersion = process.version.slice(1).split('.').map(x => parseInt(x, 10));
@@ -204,19 +189,46 @@ async function init(): Promise<Config> {
 	return config;
 }
 
-async function spawnWorkers(limit: number = 1) {
-	const workers = Math.min(limit, os.cpus().length);
-	bootLogger.info(`Starting ${workers} worker${workers === 1 ? '' : 's'}...`);
-	await Promise.all([...Array(workers)].map(spawnWorker));
+async function spawnWorkers(config: Config) {
+	const st = getWorkerStrategies(config);
+
+	bootLogger.info(`Starting ${st.workers} worker processes`);
+	const workerWorkers = await Promise.all([...Array(st.workers)].map(() => spawnWorker('worker')));
+	for (const worker of workerWorkers) workerIndex[worker.id] = 'worker';
+
+	bootLogger.info(`Starting ${st.servers} server processes`);
+	const serverWorkers = await Promise.all([...Array(st.servers)].map(() => spawnWorker('server')));
+	for (const worker of serverWorkers) workerIndex[worker.id] = 'server';
+
+	bootLogger.info(`Starting ${st.queues} queue processes`);
+	const queueWorkers = await Promise.all([...Array(st.queues)].map(() => spawnWorker('queue')));
+	for (const worker of queueWorkers) workerIndex[worker.id] = 'queue';
+
 	bootLogger.succ('All workers started');
 }
 
-function spawnWorker(): Promise<void> {
-	return new Promise(res => {
-		const worker = cluster.fork();
+export function getWorkerStrategies(config: Config) {
+	let workers = Math.min(config.clusterLimit || 1, os.cpus().length);
+	let servers = 0;
+	let queues = 0;
+
+	if (config.workerStrategies) {
+		workers = config.workerStrategies.workerWorkerCount || 0;
+		servers = config.workerStrategies.serverWorkerCount || 0;
+		queues = config.workerStrategies.queueWorkerCount || 0;
+	}
+
+	return {
+		workers, servers, queues
+	};
+}
+
+function spawnWorker(type: 'server' | 'queue' | 'worker' = 'worker'): Promise<cluster.Worker> {
+	return new Promise((res, rej) => {
+		const worker = cluster.fork({ WORKER_TYPE: type });
 		worker.on('message', message => {
-			if (message !== 'ready') return;
-			res();
+			if (message !== 'ready') return rej();
+			res(worker);
 		});
 	});
 }
@@ -238,7 +250,9 @@ cluster.on('exit', worker => {
 	// Replace the dead worker,
 	// we're not sentimental
 	clusterLogger.error(chalk.red(`[${worker.id}] died :(`));
-	cluster.fork();
+	const type = workerIndex[worker.id] || 'worker';
+	const w = cluster.fork({ WORKER_TYPE: type });
+	workerIndex[w.id] = type;
 });
 
 // Display detail of unhandled promise rejection

@@ -26,6 +26,7 @@ import { isBlockedHost } from '../../../misc/instance-info';
 import { parseAudience } from '../audience';
 import MessagingMessage from '../../../models/messaging-message';
 import DbResolver from '../db-resolver';
+import { tryStockEmoji } from '../../../services/emoji-store';
 
 const logger = apLogger;
 
@@ -315,6 +316,7 @@ export async function extractEmojis(tags: IObject | IObject[], host_: string) {
 			});
 
 			if (exists) {
+				await tryStockEmoji(exists).catch(() => {});
 				if ((tag.updated != null && exists.updatedAt == null)
 					|| (tag.id != null && exists.uri == null)
 					|| (exists.url != tag.icon.url)
@@ -326,7 +328,8 @@ export async function extractEmojis(tags: IObject | IObject[], host_: string) {
 						}, {
 							$set: {
 								uri: tag.id,
-								url: tag.icon.url,
+								url: tag.icon.url,	// TODO: ここでもローカル保存
+								saved: false,
 								updatedAt: new Date(),
 							}
 						});
@@ -336,7 +339,7 @@ export async function extractEmojis(tags: IObject | IObject[], host_: string) {
 
 			logger.info(`register emoji host=${host}, name=${name}`);
 
-			return await Emoji.insert({
+			const emoji = await Emoji.insert({
 				host,
 				name,
 				uri: tag.id,
@@ -344,6 +347,10 @@ export async function extractEmojis(tags: IObject | IObject[], host_: string) {
 				updatedAt: tag.updated ? new Date(tag.updated) : undefined,
 				aliases: []
 			});
+
+			await tryStockEmoji(emoji).catch(() => {});
+
+			return emoji;
 		})
 	);
 }

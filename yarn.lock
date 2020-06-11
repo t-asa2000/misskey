@@ -199,10 +199,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/bull@3.13.0":
-  version "3.13.0"
-  resolved "https://registry.yarnpkg.com/@types/bull/-/bull-3.13.0.tgz#d49b16010efcbb8a487161e4d78b96d1c235fbcb"
-  integrity sha512-WvXOlhun1xLyE+KC2pyoWZMn9sWKX2nLd+8wjSOh3VVz0+QsKLLpGFuhw1DjaFfiOdT8ZIxCuAUpdFlEZRPxOg==
+"@types/bull@3.14.0":
+  version "3.14.0"
+  resolved "https://registry.yarnpkg.com/@types/bull/-/bull-3.14.0.tgz#60741d3f5006bd4e17b02ff036e6ecef7ac47a6e"
+  integrity sha512-9MKWQ4Q+GFIEA3/SdSc128mAccCKni2YVMKPEdQY5qooN+3gl0Po+f7kaKukgn5s6YXj5xbvc/zTaMsHZL9GvA==
   dependencies:
     "@types/ioredis" "*"
 
@@ -529,10 +529,10 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node@*", "@types/node@14.0.11":
-  version "14.0.11"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.11.tgz#61d4886e2424da73b7b25547f59fdcb534c165a3"
-  integrity sha512-lCvvI24L21ZVeIiyIUHZ5Oflv1hhHQ5E1S25IRlKIXaRkVgmXpJMI3wUJkmym2bTbCe+WoIibQnMVAU3FguaOg==
+"@types/node@*", "@types/node@14.0.13":
+  version "14.0.13"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.0.13.tgz#ee1128e881b874c371374c1f72201893616417c9"
+  integrity sha512-rouEWBImiRaSJsVA+ITTFM6ZxibuAlTuNOCyxVbwreu6k6+ujs7DfnU9o+PShFhET78pMBl3eH+AGSI5eOTkPA==
 
 "@types/node@^10.12.18":
   version "10.17.19"
@@ -1511,10 +1511,10 @@ autwh@0.1.0:
   dependencies:
     oauth "0.9.15"
 
-aws-sdk@2.690.0:
-  version "2.690.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.690.0.tgz#4ef6339a66b52aeb34ecf1d0434a2611a0cd998c"
-  integrity sha512-KZasSKw/nKVA+LnOCaccGbFZ9eLDTz7oDc/6IYp9lbvN+XrdCBb8cQveDX3N9i4uDS2G5nz/47UxtP+MYMBynQ==
+aws-sdk@2.693.0:
+  version "2.693.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.693.0.tgz#46363d32fb2e23c6eeda049998ce8205a4ebf463"
+  integrity sha512-/0zy5IlE8wHrTXCxPYMSJGaqTKN1ulBBOSuWYeGxHU8pnTT6ZHpDdHlS83DHrVbsXnO/zq9prEf1nXRWlwgARw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -3823,10 +3823,10 @@ file-entry-cache@^5.0.1:
   dependencies:
     flat-cache "^2.0.1"
 
-file-type@14.6.0:
-  version "14.6.0"
-  resolved "https://registry.yarnpkg.com/file-type/-/file-type-14.6.0.tgz#4ed91bc77b48417e9d497fa29704e3eaab34b536"
-  integrity sha512-/Lg6yw7NtOVBe4wynSTDGyL32Jm+mqjYA7wZScjnEjYN1a68fhFhE75V2YEQPAfCoVtq6Mi02thUEYiOfTgLnQ==
+file-type@14.6.1:
+  version "14.6.1"
+  resolved "https://registry.yarnpkg.com/file-type/-/file-type-14.6.1.tgz#156cf5de04649729469b2d527773df29b5eca051"
+  integrity sha512-h8TJ6Ff9UuhSOHr44Xh2J2r7Gg5ED8jNZKQ2XA2WyFCRum9qTcY3Qy1Q6mG5xMTeIT3IJcLlSReD4WEr/nL9vw==
   dependencies:
     readable-web-to-node-stream "^2.0.0"
     strtok3 "^6.0.0"
@@ -9325,10 +9325,10 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-systeminformation@*, systeminformation@4.26.6:
-  version "4.26.6"
-  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-4.26.6.tgz#cad751a6640cab1130c6ffe9cea26dfb528c1dee"
-  integrity sha512-oXWCX3imUhwlGTOGMNchkA+/hqGYsiAAGAs6y5aoOUffekpcP+HTNrD2C+MbCZzYzZz9Q55N5D8nUh6odHGL7w==
+systeminformation@*, systeminformation@4.26.9:
+  version "4.26.9"
+  resolved "https://registry.yarnpkg.com/systeminformation/-/systeminformation-4.26.9.tgz#ecc725a162c0c7d8d48226f97637a5f590042ffd"
+  integrity sha512-69MTIX9j//wnteJzQWuGL6FiMxlfS3wTWyhROI6pNUaQALYqJb3W9VtLVcEcKFOjO1vrGRgilJVFzJeRRi//Pg==
 
 syuilo-password-strength@0.0.1:
   version "0.0.1"

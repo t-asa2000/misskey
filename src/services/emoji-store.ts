@@ -52,4 +52,26 @@ export async function stockEmoji(emoji: IEmoji) {
 			saved: true
 		}
 	});
+
+	const emoji2 = await Emoji.findOne(emoji._id);
+	if (!emoji2) return;
+
+	const m = await Emoji.findOne({
+		md5: emoji2.md5,
+		host: null,
+	});
+
+	if (m) return;
+
+	const copied = await Emoji.insert({
+		updatedAt: new Date(),
+		name: emoji2.name,
+		host: null,
+		aliases: [],
+		url: emoji2.url,
+		type: emoji2.type,
+		md5: emoji2.md5
+	});
+
+	console.log(`copied emoji ${copied.name}`);
 }

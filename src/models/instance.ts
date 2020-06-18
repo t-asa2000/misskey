@@ -96,4 +96,8 @@ export interface IInstance {
 	description?: string;
 	maintainerName?: string;
 	maintainerEmail?: string;
+	cc?: string;
+	isp?: string;
+	org?: string;
+	as?: string;
 }

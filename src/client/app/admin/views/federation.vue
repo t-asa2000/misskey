@@ -53,6 +53,24 @@
 					</ui-input>
 				</ui-horizon-group>
 				<ui-horizon-group inputs>
+					<ui-input :value="instance.cc" type="text" readonly>
+						<span>CC</span>
+						<template #prefix><fa :icon="faInbox"/></template>
+					</ui-input>
+					<ui-input :value="instance.isp" type="text" readonly>
+						<span>ISP</span>
+						<template #prefix><fa :icon="faInbox"/></template>
+					</ui-input>
+					<ui-input :value="instance.org" type="text" readonly>
+						<span>ORG</span>
+						<template #prefix><fa :icon="faInbox"/></template>
+					</ui-input>
+					<ui-input :value="instance.as" type="text" readonly>
+						<span>AS</span>
+						<template #prefix><fa :icon="faInbox"/></template>
+					</ui-input>
+				</ui-horizon-group>
+				<ui-horizon-group inputs>
 					<ui-input :value="instance.softwareName" type="text" readonly>
 						<span>{{ $t('softwareName') }}</span>
 						<template #prefix><fa :icon="faInbox"/></template>
@@ -147,9 +165,14 @@
 					<option value="markedAsClosed">{{ $t('states.marked-as-closed') }}</option>
 				</ui-select>
 			</ui-horizon-group>
-			<ui-input v-model="softwareName" type="text" spellcheck="false" @input="fetchInstances()">
-				<span>{{ $t('softwareName') }}</span>
-			</ui-input>
+			<ui-horizon-group inputs>
+				<ui-input v-model="softwareName" type="text" spellcheck="false" @input="fetchInstances()">
+					<span>{{ $t('softwareName') }}</span>
+				</ui-input>
+				<ui-input v-model="cc" type="text" spellcheck="false" @input="fetchInstances()">
+					<span>CC</span>
+				</ui-input>
+			</ui-horizon-group>
 
 			<div class="instances">
 				<header>
@@ -205,6 +228,8 @@ export default Vue.extend({
 			target: null,
 			sort: '+lastCommunicatedAt',
 			state: 'all',
+			softwareName: '',
+			cc: '',
 			limit: 100,
 			instances: [],
 			chart: null,
@@ -308,6 +333,7 @@ export default Vue.extend({
 			this.instances = [];
 			this.$root.api('federation/instances', {
 				softwareName: this.softwareName,
+				cc: this.cc,
 				blocked: this.state === 'blocked' ? true : null,
 				notResponding: this.state === 'notResponding' ? true : null,
 				markedAsClosed: this.state === 'markedAsClosed' ? true : null,

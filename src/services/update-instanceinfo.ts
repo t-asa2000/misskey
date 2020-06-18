@@ -2,6 +2,8 @@ import { getJson } from '../misc/fetch';
 import Instance, { IInstance } from '../models/instance';
 import { toApHost } from '../misc/convert-host';
 import Logger from './logger';
+import { InboxRequestData } from '../queue';
+import { geoIpLookup } from './geoip';
 
 export const logger = new Logger('instanceinfo', 'cyan');
 
@@ -35,7 +37,7 @@ type Nodeinfo = {
 	};
 };
 
-export async function UpdateInstanceinfo(instance: IInstance) {
+export async function UpdateInstanceinfo(instance: IInstance, request?: InboxRequestData) {
 	const _instance = await Instance.findOne({ host: instance.host });
 	if (!_instance) throw 'Instance is not registed';
 
@@ -54,9 +56,22 @@ export async function UpdateInstanceinfo(instance: IInstance) {
 	const info = await fetchInstanceinfo(toApHost(instance.host));
 	logger.info(JSON.stringify(info, null, 2));
 
+	// GeoIP
+	const geoip = request?.ip ? await geoIpLookup(request.ip).catch(e => {
+		logger.warn(`GeoIP failed for ${toApHost(instance.host!)} ${request.ip} ${e}`);
+		return null;
+	}) : null;
+	if (geoip) {
+		logger.info(`GeoIP: ${toApHost(instance.host!)} ${request?.ip} => ${JSON.stringify(geoip)}`);
+	}
+
 	await Instance.update({ _id: instance._id }, {
 		$set: {
 			infoUpdatedAt: new Date(),
+			cc: geoip?.cc,
+			isp: geoip?.isp,
+			org: geoip?.org,
+			as: geoip?.as,
 			softwareName: info.softwareName,
 			softwareVersion: info.softwareVersion,
 			openRegistrations: info.openRegistrations,

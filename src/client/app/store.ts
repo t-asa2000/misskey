@@ -50,6 +50,7 @@ const defaultDeviceSettings = Object.assign({
 	deckColumnAlign: 'center',
 	roundedCorners: true,
 	reduceMotion: false,
+	visibilityColoring: 'left',
 	darkmode: true,
 	darkTheme: 'future',
 	lightTheme: 'light',

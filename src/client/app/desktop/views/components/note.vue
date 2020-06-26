@@ -1,7 +1,14 @@
 <template>
 <div
 	class="note"
-	:class="{ mini: narrow }"
+	:class="{
+		mini: narrow,
+		'visibility-home': appearNote.visibility === 'home',
+		'visibility-followers': appearNote.visibility === 'followers',
+		'visibility-specified': appearNote.visibility === 'specified',
+		'coloring-bg': $store.state.device.visibilityColoring === 'bg',
+		'coloring-left': $store.state.device.visibilityColoring === 'left',
+	 }"
 	v-show="appearNote.deletedAt == null && !hideThisNote"
 	:tabindex="appearNote.deletedAt == null ? '-1' : null"
 	v-hotkey="keymap"
@@ -35,7 +42,7 @@
 					<mk-poll v-if="appearNote.poll" :note="appearNote" ref="pollViewer"/>
 					<a class="location" v-if="appearNote.geo" :href="`https://maps.google.com/maps?q=${appearNote.geo.coordinates[1]},${appearNote.geo.coordinates[0]}`" rel="noopener" target="_blank"><fa icon="map-marker-alt"/> 位置情報</a>
 					<div class="renote" v-if="appearNote.renote"><mk-note-preview :note="appearNote.renote"/></div>
-					<mk-url-preview v-for="url in urls" :url="url" :key="url" :mini="mini" :compact="compact"/>
+					<mk-url-preview v-for="url in urls" :url="url" :key="url" :mini="mini" :compact="compact" :detail="detail"/>
 				</div>
 			</div>
 			<footer v-if="appearNote.deletedAt == null && !preview" class="footer">
@@ -173,6 +180,28 @@ export default Vue.extend({
 	padding 0
 	overflow hidden
 	box-shadow 0 1px 8px rgba(0, 0, 0, 0.2)
+
+	&.coloring-bg
+		&.visibility-home
+			background-color var(--noteHomeBg)
+
+		&.visibility-followers
+			background-color var(--noteFollowersBg)
+
+		&.visibility-specified
+			background-color var(--noteSpecifiedBg)
+
+	&.coloring-left
+		border-left: transparent solid 5px
+
+		&.visibility-home
+			border-left-color var(--noteHomeBorder)
+
+		&.visibility-followers
+			border-left-color var(--noteFollowersBorder)
+
+		&.visibility-specified
+			border-left-color var(--noteSpecifiedBorder)
 
 	&.mini
 		font-size 13px

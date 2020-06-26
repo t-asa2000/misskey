@@ -63,6 +63,12 @@
 				<ui-radio v-model="deckColumnAlign" value="left">{{ $t('@._settings.deck-column-align-left') }}</ui-radio>
 				<ui-radio v-model="deckColumnAlign" value="flexible">{{ $t('@._settings.deck-column-align-flexible') }}</ui-radio>
 			</section>
+			<section>
+				<header>{{ $t('@._settings.visibilityColoring') }}</header>
+				<ui-radio v-model="visibilityColoring" value="none">{{ $t('@._settings.visibilityColoring-none') }}</ui-radio>
+				<ui-radio v-model="visibilityColoring" value="bg">{{ $t('@._settings.visibilityColoring-bg') }}</ui-radio>
+				<ui-radio v-model="visibilityColoring" value="left">{{ $t('@._settings.visibilityColoring-left') }}</ui-radio>
+			</section>
 			<section v-if="isAdvanced">
 				<ui-switch v-model="games_reversi_showBoardLabels">{{ $t('@._settings.show-reversi-board-labels') }}</ui-switch>
 				<ui-switch v-model="games_reversi_useAvatarStones">{{ $t('@._settings.use-avatar-reversi-stones') }}</ui-switch>
@@ -379,6 +385,11 @@ export default Vue.extend({
 		deckColumnAlign: {
 			get() { return this.$store.state.device.deckColumnAlign; },
 			set(value) { this.$store.commit('device/set', { key: 'deckColumnAlign', value }); }
+		},
+
+		visibilityColoring: {
+			get() { return this.$store.state.device.visibilityColoring || 'left'; },
+			set(value) { this.$store.commit('device/set', { key: 'visibilityColoring', value }); }
 		},
 
 		enableSounds: {

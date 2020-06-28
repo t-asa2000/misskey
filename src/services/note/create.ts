@@ -6,7 +6,7 @@ import { createDeleteNoteJob } from '../../queue';
 import renderNote from '../../remote/activitypub/renderer/note';
 import renderCreate from '../../remote/activitypub/renderer/create';
 import renderAnnounce from '../../remote/activitypub/renderer/announce';
-import { renderActivity, attachLdSignature } from '../../remote/activitypub/renderer';
+import { renderActivity } from '../../remote/activitypub/renderer';
 import DriveFile, { IDriveFile } from '../../models/drive-file';
 import notify from '../../services/create-notification';
 import NoteWatching from '../../models/note-watching';
@@ -34,6 +34,7 @@ import extractHashtags from '../../misc/extract-hashtags';
 import { genId } from '../../misc/gen-id';
 import DeliverManager from '../../remote/activitypub/deliver-manager';
 import { deliverToRelays } from '../relay';
+import { getIndexer } from '../../misc/mecab';
 
 type NotificationType = 'reply' | 'renote' | 'quote' | 'mention' | 'highlight';
 
@@ -540,16 +541,29 @@ async function insertNote(user: IUser, data: Option, tags: string[], emojis: str
 }
 
 function index(note: INote) {
-	if (note.text == null || config.elasticsearch == null) return;
+	if (config.mecabSearch) {
+		getIndexer(note).then(mecabWords => {
+			if (note.visibility === 'public' || note.visibility === 'home') {
+				console.log(`Index: ${note._id} ${JSON.stringify(mecabWords)}`);
+			}
+			Note.findOneAndUpdate({ _id: note._id }, {
+				$set: { mecabWords }
+			});
+		});
+	}
 
-	es.index({
-		index: 'misskey',
-		type: 'note',
-		id: note._id.toString(),
-		body: {
-			text: note.text
-		}
-	});
+	if (!note.text || !config.elasticsearch) return;
+
+	if (es) {
+		es.index({
+			index: 'misskey',
+			type: 'note',
+			id: note._id.toString(),
+			body: {
+				text: note.text
+			}
+		});
+	}
 }
 
 async function notifyToWatchersOfRenotee(renote: INote, user: IUser, nm: NotificationManager, type: NotificationType) {

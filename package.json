@@ -1,7 +1,7 @@
 {
 	"name": "misskey",
 	"author": "syuilo <syuilotan@yahoo.co.jp>",
-	"version": "10.102.270-m544",
+	"version": "10.102.272-m544",
 	"codename": "nighthike",
 	"repository": {
 		"type": "git",
@@ -96,7 +96,7 @@
 		"autobind-decorator": "2.4.0",
 		"autosize": "4.0.2",
 		"autwh": "0.1.0",
-		"aws-sdk": "2.705.0",
+		"aws-sdk": "2.706.0",
 		"bcryptjs": "2.4.3",
 		"bootstrap-vue": "2.15.0",
 		"browser-image-resizer": "2.1.0",
@@ -199,7 +199,7 @@
 		"syuilo-password-strength": "0.0.1",
 		"terser-webpack-plugin": "3.0.6",
 		"textarea-caret": "3.1.0",
-		"three": "0.118.1",
+		"three": "0.118.3",
 		"tinycolor2": "1.4.1",
 		"tmp": "0.2.1",
 		"ts-loader": "7.0.5",

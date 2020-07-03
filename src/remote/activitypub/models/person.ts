@@ -28,6 +28,7 @@ import { toArray, toSingle } from '../../../prelude/array';
 import { UpdateInstanceinfo } from '../../../services/update-instanceinfo';
 import { extractDbHost } from '../../../misc/convert-host';
 import DbResolver from '../db-resolver';
+import resolveUser from '../../resolve-user';
 const logger = apLogger;
 
 /**
@@ -133,7 +134,7 @@ export async function createPerson(uri: string, resolver?: Resolver): Promise<IU
 	const bday = person['vcard:bday']?.match(/^\d{4}-\d{2}-\d{2}/);
 
 	// Create user
-	let user: IRemoteUser;
+	let user: IRemoteUser | undefined;
 	try {
 		user = await User.insert({
 			avatarId: null,
@@ -180,6 +181,24 @@ export async function createPerson(uri: string, resolver?: Resolver): Promise<IU
 			user = await User.findOne({
 				uri: person.id
 			});
+
+			// 同じ@username@host を持つものがあった場合、被った先を返す
+			if (user == null) {
+				const u = await User.findOne({
+					usernameLower: person.preferredUsername.toLowerCase(),
+					host
+				});
+
+				if (u) {
+					throw {
+						code: 'DUPLICATED_USERNAME',
+						with: u,
+					};
+				}
+
+				logger.error(e);
+				throw e;
+			}
 		} else {
 			logger.error(e);
 			throw e;
@@ -432,7 +451,25 @@ export async function resolvePerson(uri: string, verifier?: string, resolver?: R
 
 	// リモートサーバーからフェッチしてきて登録
 	if (resolver == null) resolver = new Resolver();
-	return await createPerson(uri, resolver);
+
+	let user: IUser | null = null;
+
+	try {
+		user = await createPerson(uri, resolver);
+	} catch (e) {
+		if (e.code === 'DUPLICATED_USERNAME') {
+			// uriからresolveしたユーザーを作成しようとしたら同じ @username@host が既に存在した場合にここに来る
+			const existUser = e.with as IRemoteUser;
+			logger.warn(`Duplicated username. input(uri=${uri}) exist(uri=${existUser.uri} username=${existUser.username}, host=${existUser.host})`);
+
+			// WebFinger(@username@host)からresync をトリガする (24時間以上古い場合)
+			resolveUser(existUser.username, existUser.host);
+		}
+
+		throw e;
+	}
+
+	return user;
 }
 
 const services: {

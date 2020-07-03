@@ -776,10 +776,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/ws@7.2.5":
-  version "7.2.5"
-  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.2.5.tgz#513f28b04a1ea1aa9dc2cad3f26e8e37c88aae49"
-  integrity sha512-4UEih9BI1nBKii385G9id1oFrSkLcClbwtDfcYj8HJLQqZVAtb/42vXVrYvRWCcufNF/a+rZD3MxNwghA7UmCg==
+"@types/ws@7.2.6":
+  version "7.2.6"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-7.2.6.tgz#516cbfb818310f87b43940460e065eb912a4178d"
+  integrity sha512-Q07IrQUSNpr+cXU4E4LtkSIBPie5GLZyyMC1QtQYRLWz701+XcoVygGUZgvLqElq1nU4ICldMYPnexlBsg3dqQ==
   dependencies:
     "@types/node" "*"
 
@@ -1536,10 +1536,10 @@ autwh@0.1.0:
   dependencies:
     oauth "0.9.15"
 
-aws-sdk@2.706.0:
-  version "2.706.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.706.0.tgz#09f65e9a91ecac5a635daf934082abae30eca953"
-  integrity sha512-7GT+yrB5Wb/zOReRdv/Pzkb2Qt+hz6B/8FGMVaoysX3NryHvQUdz7EQWi5yhg9CxOjKxdw5lFwYSs69YlSp1KA==
+aws-sdk@2.709.0:
+  version "2.709.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.709.0.tgz#33b0c0fe8b9420c65610545394be047ac2d93c8f"
+  integrity sha512-F3sKXsCiutj9RglVXdqb/XJ3Ko3G+pX081Nf1YjVJpLydwE2v16FGxrLqE5pqyWMDeUf5nZHnBoMuOYD8ip+Kw==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -1913,10 +1913,10 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
-bull@3.14.0:
-  version "3.14.0"
-  resolved "https://registry.yarnpkg.com/bull/-/bull-3.14.0.tgz#75fcfa17e829c860de0d51b79569636845232715"
-  integrity sha512-qQrytpqbE6Zjl2zkvlqS1kUwWLJHpDOhhuGb34+5atPeZrd8DlxkAbxnLnaMB1XQX1iXPzFVpDOUOIIROYKp6Q==
+bull@3.15.0:
+  version "3.15.0"
+  resolved "https://registry.yarnpkg.com/bull/-/bull-3.15.0.tgz#1cebf9f7fbf5ceb1aa5348e86910c2097554d980"
+  integrity sha512-5+HoYZXy5tYIpWdod7Xa0nahRkN2uItfmoCqgWEokabDjD4igvfB9CHf3uPWBnXngQ8EiTlglim5IGdz4MzdvA==
   dependencies:
     cron-parser "^2.13.0"
     debuglog "^1.0.0"
@@ -9928,10 +9928,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@3.9.5:
-  version "3.9.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.5.tgz#586f0dba300cde8be52dd1ac4f7e1009c1b13f36"
-  integrity sha512-hSAifV3k+i6lEoCJ2k6R2Z/rp/H3+8sdmcn5NrS3/3kE7+RyZXm9aqvxWqjEXHAd8b0pShatpcdMTvEdvAJltQ==
+typescript@3.9.6:
+  version "3.9.6"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
+  integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
 
 uglify-js@^2.6.1, uglify-js@^2.7.0:
   version "2.8.29"
@@ -10326,10 +10326,10 @@ vue-js-modal@1.3.35:
   resolved "https://registry.yarnpkg.com/vue-js-modal/-/vue-js-modal-1.3.35.tgz#5f54de1a30a5f977121bfe6b2a1a5498bce2752a"
   integrity sha512-DKtxUCW/oprM/ndn9h/cnVgsmqjQ/ARy5rH4q/11Pas04og2td+sltl91H/rlwXTwJIqWyt+lJizK5o4ErjWIQ==
 
-vue-json-pretty@1.6.3:
-  version "1.6.3"
-  resolved "https://registry.yarnpkg.com/vue-json-pretty/-/vue-json-pretty-1.6.3.tgz#c7f378f3c9f68977047de28197735bc2cf81b15b"
-  integrity sha512-dgb04fT9PMndfCI4RiQcqaV5P0hSg97LObm15Mkzjl2hL+qWJd833tOd2RhK/yk8AieZt8eJUac5NTZb31O6Mg==
+vue-json-pretty@1.6.4:
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/vue-json-pretty/-/vue-json-pretty-1.6.4.tgz#da5b148674f18f7130a918d4a8dcb4373d4952e6"
+  integrity sha512-TCehrJGvTjmYUYJQojyexyT31yj67kcAxt3ELNPoJeGPeeQ+sIufyK/lKAzhJW82NDY2duuCw73fRxZv8NaeMg==
 
 vue-loader@15.9.3:
   version "15.9.3"
@@ -10423,10 +10423,10 @@ vuex-persistedstate@3.0.1:
     deepmerge "^4.2.2"
     shvl "^2.0.0"
 
-vuex@3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/vuex/-/vuex-3.4.0.tgz#20cc086062d750769fce1febb34e7fceeaebde45"
-  integrity sha512-ajtqwEW/QhnrBZQsZxCLHThZZaa+Db45c92Asf46ZDXu6uHXgbfVuBaJ4gzD2r4UX0oMJHstFwd2r2HM4l8umg==
+vuex@3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/vuex/-/vuex-3.5.1.tgz#f1b8dcea649bc25254cf4f4358081dbf5da18b3d"
+  integrity sha512-w7oJzmHQs0FM9LXodfskhw9wgKBiaB+totOdb8sNzbTB2KDCEEwEs29NzBZFh/lmEK1t5tDmM1vtsO7ubG1DFw==
 
 w3c-hr-time@^1.0.2:
   version "1.0.2"

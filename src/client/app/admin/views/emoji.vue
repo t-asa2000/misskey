@@ -28,6 +28,9 @@
 	<ui-card>
 		<template #title><fa :icon="faGrin"/> {{ $t('emojis.title') }}</template>
 		<section style="padding: 16px 32px">
+			<ui-button @click="exportEmoji">{{ $t('export') }}</ui-button>
+		</section>
+		<section style="padding: 16px 32px">
 			<ui-horizon-group searchboxes>
 				<ui-input v-model="searchLocal" type="text" spellcheck="false" @input="fetchEmojis('local', true)">
 					<span>{{ $t('name') }}</span>
@@ -163,6 +166,20 @@ export default Vue.extend({
 				});
 				this.fetchEmojis('local', true);
 			}).catch(e => {
+				this.$root.dialog({
+					type: 'error',
+					text: e
+				});
+			});
+		},
+
+		exportEmoji() {
+			this.$root.api('admin/emoji/export').then((file: any) => {
+				this.$root.dialog({
+					type: 'success',
+					text: `Exported to ${file.name}`,
+				});
+			}).catch((e: any) => {
 				this.$root.dialog({
 					type: 'error',
 					text: e

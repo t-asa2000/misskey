@@ -1,10 +1,12 @@
 <template>
-<div class="instance-info" v-if="instance != null" :title="getDetail(instance)">
-	<img class="icon" v-if="instance.iconUrl != null" :src="`/proxy/icon.ico?${urlQuery({ url: instance.iconUrl })}`"/>
-	<div class="name">
-		{{ (instance.name && instance.name !== instance.host) ? `${instance.name} (${instance.host})` : `${instance.host}` }}
+<router-link class="instance-info-wrap" v-if="instance != null" :to="`/search?q=${ encodeURIComponent(`host:${instance.host}`) }`">
+	<div class="instance-info" :title="getDetail(instance)" :style="{ background: `linear-gradient(to right, ${themeColor}, rgba(0, 0, 0, 0))` }">
+		<img class="icon" v-if="instance.iconUrl != null" :src="`/proxy/icon.ico?${urlQuery({ url: instance.iconUrl })}`"/>
+		<div class="name">
+			{{ (instance.name && instance.name !== instance.host) ? `${instance.name} (${instance.host})` : `${instance.host}` }}
+		</div>
 	</div>
-</div>
+</router-link>
 </template>
 
 <script lang="ts">
@@ -26,6 +28,19 @@ export default Vue.extend({
 			urlQuery
 		}
 	},
+	computed: {
+		themeColor(): string {
+			if (this.instance.themeColor) {
+				const m = this.instance.themeColor.match(/^#([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})/);	// TODO: other format
+				const r = parseInt(m[1], 16);
+				const g = parseInt(m[2], 16);
+				const b = parseInt(m[3], 16);
+				return `rgba(${r}, ${g}, ${b}, 0.5)`;
+			} else {
+				return `rgba(64, 64, 255, 0.5)`;
+			}
+		},
+	},
 	methods: {
 		getName(instance: II): string {
 			if (!instance) return 'Unknown';
@@ -45,21 +60,25 @@ export default Vue.extend({
 </script>
 
 <style lang="stylus" scoped>
-	.instance-info
-		display flex
-		align-items center
-		font-size 0.9em
-		color var(--noteText)
-		cursor default
-		background linear-gradient(to right, rgba(64, 64, 255, .3), rgba(0, 0, 0, 0))
+	.instance-info-wrap
+		text-decoration none 
+		cursor pointer
 
-		.icon
-			width 1em
-			height 1em
-			margin-right 0.2em
+		.instance-info
+			display flex
+			align-items center
+			font-size 0.9em
+			color var(--noteText)
+			border-radius 0.2em
+			margin-bottom 0.3em
 
-		.name
-			overflow hidden
-			white-space nowrap
-			text-overflow ellipsis
+			.icon
+				width 1em
+				height 1em
+				margin-right 0.2em
+
+			.name
+				overflow hidden
+				white-space nowrap
+				text-overflow ellipsis
 </style>

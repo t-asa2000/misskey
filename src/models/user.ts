@@ -179,12 +179,20 @@ export interface ILocalUser extends IUserBase {
 	twoFactorEnabled: boolean;
 	twoFactorTempSecret?: string;
 	clientSettings: any;
-	settings: {
+	settings?: {
 		autoWatch: boolean;
 		alwaysMarkNsfw?: boolean;
+		pushNotifications?: Record<string, boolean | undefined>;
 	};
 	hasUnreadNotification: boolean;
 	hasUnreadMessagingMessage: boolean;
+}
+
+export function getPushNotificationsValue(pushNotifications: Record<string, boolean | undefined> | undefined, key: string) {
+	if (pushNotifications == null) return true;
+	const value = pushNotifications[key];
+	if (value == null) return true;
+	return value;
 }
 
 export interface IRemoteUser extends IUserBase {
@@ -235,6 +243,7 @@ export function isValidLocation(location: string): boolean {
 }
 
 export function isValidBirthday(birthday: string): boolean {
+	// eslint-disable-next-line no-useless-escape
 	return typeof birthday == 'string' && /^([0-9]{4})\-([0-9]{2})-([0-9]{2})$/.test(birthday);
 }
 //#endregion
@@ -303,7 +312,7 @@ export async function getRelation(me: mongo.ObjectId, target: mongo.ObjectId) {
  * @param options? serialize options
  * @return Packed user
  */
-export const pack = (
+export const pack = async (
 	user: string | mongo.ObjectID | IUser,
 	me?: string | mongo.ObjectID | IUser,
 	options?: {
@@ -311,7 +320,7 @@ export const pack = (
 		includeSecrets?: boolean,
 		includeHasUnreadNotes?: boolean
 	}
-) => new Promise<any>(async (resolve, reject) => {
+) => {
 	const opts = Object.assign({
 		detail: false,
 		includeSecrets: false
@@ -353,7 +362,7 @@ export const pack = (
 	// (データベースの欠損などで)ユーザーがデータベース上に見つからなかったとき
 	if (_user == null) {
 		dbLogger.warn(`user not found on database: ${user}`);
-		return resolve(null);
+		return null;
 	}
 
 	// Me
@@ -515,8 +524,8 @@ export const pack = (
 	// resolve promises in _user object
 	_user = await rap(_user);
 
-	resolve(_user);
-});
+	return _user;
+};
 
 /*
 function img(url) {

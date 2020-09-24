@@ -3,6 +3,8 @@ import Note from '../../../../models/note';
 import { packMany } from '../../../../models/note';
 import define from '../../define';
 import { getHideUserIds } from '../../common/get-hide-users';
+import { genMeid7 } from '../../../../misc/id/meid7';
+import * as mongo from 'mongodb';
 
 export const meta = {
 	desc: {
@@ -19,7 +21,7 @@ export const meta = {
 
 	params: {
 		days: {
-			validator: $.optional.either($.optional.num.range(0, 9999), $.str.pipe(v => 0 <= Number(v) && Number(v) <= 9999)),
+			validator: $.optional.either($.optional.num.range(0, 33), $.str.pipe(v => 0 <= Number(v) && Number(v) <= 33)),
 			default: 2,
 			transform: (v: any) => JSON.parse(v),
 			desc: {
@@ -81,9 +83,11 @@ export default define(meta, async (ps, user) => {
 
 	const hideUserIds = await getHideUserIds(user);
 
+	const id = genMeid7(new Date(Date.now() - day));
+
 	const query = {
-		createdAt: {
-			$gt: new Date(Date.now() - day)
+		_id: {
+			$gt: new mongo.ObjectID(id)
 		},
 		deletedAt: null,
 		visibility: 'public',
@@ -116,9 +120,6 @@ export default define(meta, async (ps, user) => {
 	const notes = await Note.find(query, {
 		limit: ps.limit,
 		sort: {
-			score: -1
-		},
-		hint: {
 			score: -1
 		}
 	});

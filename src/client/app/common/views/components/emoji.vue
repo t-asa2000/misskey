@@ -1,5 +1,6 @@
 <template>
 <img v-if="customEmoji" class="fvgwvorwhxigeolkkrcderjzcawqrscl custom" :class="{ normal: normal }" :src="url" :alt="alt" :title="title"/>
+<span v-else-if="char && vendor">{{ char }}</span>
 <img v-else-if="char" class="fvgwvorwhxigeolkkrcderjzcawqrscl" :src="url" :alt="alt" :title="alt"/>
 <span v-else-if="isReaction">❔</span>
 <span v-else>:{{ name }}:</span>
@@ -30,6 +31,14 @@ export default Vue.extend({
 			default: () => []
 		},
 		isReaction: {
+			type: Boolean,
+			default: false
+		},
+		vendor: {
+			type: Boolean,
+			default: false
+		},
+		local: {
 			type: Boolean,
 			default: false
 		},
@@ -90,7 +99,7 @@ export default Vue.extend({
 			if (!codes.includes('200d')) codes = codes.filter(x => x != 'fe0f');
 			codes = codes.filter(x => x && x.length);
 
-			this.url = `${twemojiSvgBase}/${codes.join('-')}.svg`;
+			this.url = this.local ? `/assets/emojis/${codes.join('-')}.svg` : `${twemojiSvgBase}/${codes.join('-')}.svg`;
 		}
 	},
 });

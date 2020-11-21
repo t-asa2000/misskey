@@ -300,6 +300,11 @@ common:
     showDislikeInPicker: "Show Dislike"
     enableRandomReactionPicker: "Randomly set for each picker display"
     room: "Room"
+    hasDisconnectedAction: "When past disconnected from the server"
+    _hasDisconnectedAction:
+      reload: "Reload automatically"
+      notify: "Notification only"
+      nothing: "Do nothing"
     _room:
       graphicsQuality: "Graphics Quality"
       _graphicsQuality:
@@ -412,6 +417,7 @@ common/views/pages/explore.vue:
   explore: "Explore {host}"
   explore-fediverse: "Explore fediverse"
   users-info: "Currently, {users} users are registered here"
+  searchUser: "Search user"
 common/views/components/url-preview.vue:
   enable-player: "Enable playback"
   disable-player: "Close the player"

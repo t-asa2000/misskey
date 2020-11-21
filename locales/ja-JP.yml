@@ -329,6 +329,11 @@ common:
     recentReactionsCount: "履歴の数"
     showDislikeInPicker: "Dislikeを表示する"
     enableRandomReactionPicker: "ピッカー表示ごとにランダムに設定する"
+    hasDisconnectedAction: "サーバーから切断されていたとき"
+    _hasDisconnectedAction:
+      reload: "自動でリロードする"
+      notify: "通知のみ"
+      nothing: "なにもしない"
     room: "ルーム"
     _room:
       graphicsQuality: "グラフィックの品質"
@@ -450,6 +455,7 @@ common/views/pages/explore.vue:
   explore: "{host}を探索"
   explore-fediverse: "Fediverseを探索"
   users-info: "現在{users}ユーザーが登録されています"
+  searchUser: "ユーザーを検索"
 
 common/views/components/url-preview.vue:
   enable-player: "プレイヤーを開く"

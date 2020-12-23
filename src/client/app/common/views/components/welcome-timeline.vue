@@ -58,7 +58,7 @@ export default Vue.extend({
 
 			this.$root.api('notes/featured', {
 				limit: this.max,
-				days: 0.1,
+				days: 0.3,
 				excludeNsfw: true,
 				includeGlobal: true,
 			}, false, true).then((notes: any[]) => {

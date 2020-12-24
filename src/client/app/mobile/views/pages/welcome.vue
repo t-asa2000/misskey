@@ -83,7 +83,7 @@ export default Vue.extend({
 			fileType: image,
 			limit: 6,
 			days: 2,
-			excludeNsfw: false,
+			excludeNsfw: true,
 			includeGlobal: true,
 		}, false, true).then((notes: any[]) => {
 			notes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

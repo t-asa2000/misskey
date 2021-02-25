@@ -14,6 +14,7 @@ import { fromHtml } from '../mfm/from-html';
 import config from '../config';
 import { sendBase } from './h';
 import api from './api';
+import urlPreview from './web/url-preview';
 const htmlescape = require('htmlescape');
 
 export default async (server: Fastify.FastifyInstance, opts: Fastify.FastifyPluginOptions, done: (err?: Error) => void) => {
@@ -36,6 +37,7 @@ export default async (server: Fastify.FastifyInstance, opts: Fastify.FastifyPlug
 		reply.sendFile('robots.txt');
 	});
 
+	server.get('/url', urlPreview);
 
 	server.register(pointOfView, {
 		engine: {

@@ -34,14 +34,6 @@ const client = `${__dirname}/../../client/`;
 // Init app
 const app = new Koa();
 
-// Init renderer
-app.use(views(__dirname + '/views', {
-	extension: 'pug',
-	options: {
-		config
-	}
-}));
-
 // Common request handler
 app.use(async (ctx, next) => {
 	// IFrameの中に入れられないようにする

@@ -71,63 +71,6 @@ export default (): Promise<void> => new Promise<void>((resolve, reject) => {
 	});
 });
 
-/*
-API
-  post/get/upload
-
-para
-websocket
-file
-*/
-
-/*
-server.get('/assets/a.js', async (request, reply) => {
-	console.log(request.url);
-	reply
-		.sendFile('a.js')
-
-});
-*/
-/*
-server.get('/actor', async (request, reply) => {
-	const actor = await getActor();
-
-	reply
-		.code(200)
-		.type('application/activity+json')
-		.header('Cache-Control', 'public, max-age=180')
-		.send(attachContext(await renderActor(actor, `${config.url}/actor`)));
-});
-
-const replyEmptyCollection = async (request: Fastify.FastifyRequest, reply: Fastify.FastifyReply) => {
-	reply
-		.code(200)
-		.type('application/activity+json')
-		.header('Cache-Control', 'public, max-age=180')
-		.send(attachContext(await renderOrderedCollection(`${config.url}/actor/following`)));
-}
-
-server.get('/actor/followers', replyEmptyCollection);
-server.get('/actor/following', replyEmptyCollection);
-server.get('/actor/outbox', replyEmptyCollection);
-
-server.post('/inbox', {}, async (request, reply) => {
-	let signature;
-
-	try {
-		signature = httpSignature.parseRequest(request.raw, { 'headers': [] });
-	} catch (e) {
-		console.log(`signature parse error: ${util.inspect(e)}`);
-		reply.code(401).send('signature parse error');
-		return;
-	}
-
-	await createInboxJob(request.body, signature);
-
-	reply.code(202).send('accepted');
-});
-*/
-
 // For testing
 /*
 export const startServer = () => {

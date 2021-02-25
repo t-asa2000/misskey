@@ -42,9 +42,6 @@ app.use(views(__dirname + '/views', {
 	}
 }));
 
-// Serve favicon
-app.use(favicon(`${client}/assets/favicon.ico`));
-
 // Common request handler
 app.use(async (ctx, next) => {
 	// IFrameの中に入れられないようにする
@@ -57,13 +54,6 @@ const router = new Router();
 
 //#region static assets
 
-// Apple touch icon
-router.get('/apple-touch-icon.png', async ctx => {
-	await send(ctx, '/assets/apple-touch-icon.png', {
-		root: client
-	});
-});
-
 // ServiceWorker
 router.get(/^\/sw\.(.+?)\.js$/, async ctx => {
 	await send(ctx, `/assets/sw.${ctx.params[0]}.js`, {
@@ -73,12 +63,6 @@ router.get(/^\/sw\.(.+?)\.js$/, async ctx => {
 
 // Manifest
 router.get('/manifest.json', require('./manifest'));
-
-router.get('/robots.txt', async ctx => {
-	await send(ctx, '/assets/robots.txt', {
-		root: client
-	});
-});
 
 //#endregion
 

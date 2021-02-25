@@ -47,10 +47,21 @@ export default async (server: Fastify.FastifyInstance, opts: Fastify.FastifyPlug
 			if (endpoint.meta.allowGet) {
 				server.get(`/${endpoint.name}`, handler.bind(null, endpoint));
 			} else {
-				server.get(`/${endpoint.name}`, async (request, reply) => { reply.send(405).send(); });
+				server.get(`/${endpoint.name}`, async (request, reply) => {
+					reply
+						.header('Allow', 'POST')
+						.methodNotAllowed('Must be a POST');
+				});
 			}
 		}
 	}
+
+	server.post('/signup', signup);
+	server.post('/signin', signin);
+
+	server.get('*', async (request, reply) => {
+		reply.notFound('Unknown API');
+	});
 
 	done();
 };
@@ -81,10 +92,6 @@ const upload = multer({
 // Init router
 const router = new Router();
 
-
-
-router.post('/signup', signup);
-router.post('/signin', signin);
 
 router.use(discord.routes());
 router.use(github.routes());

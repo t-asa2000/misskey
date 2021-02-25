@@ -3,7 +3,6 @@ import { IEndpoint } from './endpoints';
 import authenticate from './authenticate';
 import call from './call';
 import { ApiError } from './error';
-import { inspect } from 'util';
 
 export default (endpoint: IEndpoint, req: Fastify.FastifyRequest, rep: Fastify.FastifyReply) => new Promise((res) => {
 	const body: any = req.method === 'GET' ? req.query : (req.body || {});

@@ -26,6 +26,9 @@ import { program } from '../argv';
 import routes from './routes';
 
 import * as Fastify from 'fastify';
+import fastifySensible from 'fastify-sensible';
+import fastifyCookie from 'fastify-cookie';
+
 import fastifyStatic from 'fastify-static';
 import pointOfView from 'point-of-view';
 import * as path from 'path';
@@ -42,6 +45,8 @@ const server = Fastify.fastify({
 	],
 	exposeHeadRoutes: true,
 });
+
+server.register(fastifySensible);
 
 // JSON inputとみなすContent-Type
 server.addContentTypeParser('application/activity+json', { parseAs: 'string' }, (server as any).getDefaultJsonParser('ignore', 'ignore'));

@@ -144,6 +144,7 @@ export default class MiOS extends EventEmitter {
 				body: JSON.stringify({
 					i: token
 				})
+				
 			})
 			// When success
 			.then(res => {

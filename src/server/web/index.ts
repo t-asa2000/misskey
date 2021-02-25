@@ -57,17 +57,6 @@ const router = new Router();
 
 //#region static assets
 
-router.get('/assets/*', async ctx => {
-	if (env !== 'production') {
-		ctx.set('Cache-Control', 'no-store');
-	}
-
-	await send(ctx, ctx.path, {
-		root: client,
-		maxage: ms('7 days'),
-	});
-});
-
 // Apple touch icon
 router.get('/apple-touch-icon.png', async ctx => {
 	await send(ctx, '/assets/apple-touch-icon.png', {

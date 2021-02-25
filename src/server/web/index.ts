@@ -66,9 +66,6 @@ router.get('/api-doc', async ctx => {
 	});
 });
 
-// URL preview endpoint
-router.get('/url', require('./url-preview'));
-
 router.get('/api.json', async ctx => {
 	ctx.body = genOpenapiSpec();
 });

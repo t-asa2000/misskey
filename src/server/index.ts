@@ -41,7 +41,7 @@ const server = Fastify.fastify({
 	logger: !['production', 'test'].includes(process.env.NODE_ENV || 'development'),
 	trustProxy: [
 		'127.0.0.0/8', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16',
-		'::1'
+		'::1', 'fc00::/7'
 	],
 	exposeHeadRoutes: true,
 });

@@ -18,6 +18,7 @@ import { PackedNote } from './packed-schemas';
 import { awaitAll } from '../prelude/await-all';
 import { pack as packApp } from './app';
 import { toISODateOrNull, toOidString, toOidStringOrNull } from '../misc/pack-utils';
+import { transform } from '../misc/cafy-id';
 
 const Note = db.get<INote>('notes');
 Note.createIndex('uri', { sparse: true, unique: true });
@@ -141,7 +142,7 @@ export type IChoice = {
 	votes: number;
 };
 
-export const hideNote = async (packedNote: any, meId: mongo.ObjectID | null) => {
+export const hideNote = async (packedNote: PackedNote, meId: mongo.ObjectID | null) => {
 	let hide = false;
 
 	// visibility が private かつ投稿者のIDが自分のIDではなかったら非表示(後方互換性のため)
@@ -182,7 +183,7 @@ export const hideNote = async (packedNote: any, meId: mongo.ObjectID | null) => 
 		} else {
 			// フォロワーかどうか
 			const following = await Following.findOne({
-				followeeId: packedNote.userId,
+				followeeId: transform(packedNote.userId),
 				followerId: meId
 			});
 
@@ -407,6 +408,9 @@ export const pack = async (
 		appId: toOidStringOrNull(db.appId),
 		app: db.appId ? packApp(db.appId) : null,
 
+		visibleUserIds: db.visibleUserIds?.length > 0 ? db.visibleUserIds.map(toOidString) : [],
+		mentions: db.mentions?.length > 0 ? db.mentions.map(toOidString) : [],
+
 		...(opts.detail ? {
 			reply: (opts.detail && db.replyId) ? pack(db.replyId, meId, {
 				detail: false
@@ -431,7 +435,7 @@ export const pack = async (
 	}
 
 	if (!opts.skipHide) {
-		await hideNote(db, meId);
+		await hideNote(packed, meId);
 	}
 
 	//#region (データベースの欠損などで)参照しているデータがデータベース上に見つからなかったとき

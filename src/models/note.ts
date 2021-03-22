@@ -128,6 +128,9 @@ export type INote = {
 		inbox?: string;
 	};
 	_files?: IDriveFile[];
+
+	// Lookuped
+	__user?: IUser;
 };
 
 export type IPoll = {
@@ -300,10 +303,12 @@ export const pack = async (
 					fields: { _id: false }
 				});
 			} else {
-				return packEmojis(db!.emojis, host,
-					Object.keys(reactionCounts)
-						.map(x => decodeReaction(x))
-						.map(x => x.replace(/:/g, '')))
+				const rs = Object.keys(reactionCounts)
+					.filter(x => x && x.startsWith(':'))
+					.map(x => decodeReaction(x))
+					.map(x => x.replace(/:/g, ''));
+
+				return packEmojis(db!.emojis.concat(rs), host)
 					.catch(e => {
 						console.warn(e);
 						return [];
@@ -386,7 +391,7 @@ export const pack = async (
 		text: text,
 		cw: db.cw,
 		userId: toOidString(db.userId),
-		user: packUser(db.userId, meId),
+		user: packUser(db.__user as IUser || db.userId, meId),
 		replyId: db.replyId ? `${db.replyId}` : null,
 		renoteId: db.renoteId ? `${db.renoteId}` : null,
 		viaMobile: !!db.viaMobile,

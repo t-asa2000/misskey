@@ -1,6 +1,6 @@
 import Vue, { VNode } from 'vue';
-import { MfmNode } from '../../../../../mfm/prelude';
-import { parseFull, parsePlain, parsePlainX, parseBasic, parseThin } from '../../../../../mfm/parse';
+import { MfmNode } from '../../../../../mfm/types';
+import { parseFull, parsePlain, parsePlainX, parseBasic } from '../../../../../mfm/parse';
 import MkUrl from './url.vue';
 import MkMention from './mention.vue';
 import { concat } from '../../../../../prelude/array';
@@ -8,6 +8,7 @@ import MkFormula from './formula.vue';
 import MkCode from './code.vue';
 import MkGoogle from './google.vue';
 import { host } from '../../../config';
+import { normalizeTag } from '../../../../../misc/normalize-tag';
 
 export default Vue.component('misskey-flavored-markdown', {
 	props: {
@@ -25,13 +26,7 @@ export default Vue.component('misskey-flavored-markdown', {
 			type: Boolean,
 			default: false
 		},
-		// たぶん使わない
 		basic: {
-			type: Boolean,
-			default: false
-		},
-		// 装飾を含んでないことがわかっている場合
-		thin: {
 			type: Boolean,
 			default: false
 		},
@@ -50,6 +45,11 @@ export default Vue.component('misskey-flavored-markdown', {
 		customEmojis: {
 			required: false,
 		},
+		hashtags: {
+			type: Array,
+			required: false,
+			default: null
+		},
 		isNote: {
 			type: Boolean,
 			default: true
@@ -59,7 +59,7 @@ export default Vue.component('misskey-flavored-markdown', {
 	render(createElement) {
 		if (this.text == null || this.text == '') return;
 
-		const ast = (this.thin ? parseThin : this.basic ? parseBasic : this.plain ? this.extra ? parsePlainX : parsePlain : parseFull)(this.text);
+		const ast = (this.basic ? parseBasic : this.plain ? this.extra ? parsePlainX : parsePlain : parseFull)(this.text);
 
 		let bigCount = 0;
 		let motionCount = 0;
@@ -442,6 +442,10 @@ export default Vue.component('misskey-flavored-markdown', {
 				}
 
 				case 'hashtag': {
+					if (this.hashtags && !(this.hashtags as string[]).map(x => normalizeTag(x)).includes(normalizeTag(node.props.hashtag))) {
+						return [createElement('span', `#${node.props.hashtag}`)];
+					}
+
 					return [createElement('router-link', {
 						key: Math.random(),
 						attrs: {

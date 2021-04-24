@@ -25,14 +25,14 @@ export const mfmLanguage = P.createLanguage({
 	plain: r => P.alt(r.emoji, r.text).atLeast(1),
 	plainX: r => P.alt(r.inline).atLeast(1),
 	basic: r => P.alt(
+		r.blockCode,
+		r.inlineCode,
 		r.mention,
 		r.hashtag,
 		r.url,
 		r.link,
 		r.emoji,
 		r.text,
-		r.inlineCode,
-		r.blockCode,
 	).atLeast(1),
 	block: r => P.alt(
 		r.title,
@@ -66,7 +66,6 @@ export const mfmLanguage = P.createLanguage({
 		r.url,
 		r.link,
 		r.emoji,
-		r.fn,
 
 		// 装飾はここに追加
 		r.blink,
@@ -75,6 +74,11 @@ export const mfmLanguage = P.createLanguage({
 		r.sup,
 		r.sub,
 		r.rgbshift,
+		r.x2,
+		r.x3,
+		r.x4,
+
+		r.fn,
 
 		r.text
 	),
@@ -243,6 +247,9 @@ export const mfmLanguage = P.createLanguage({
 	sup: r => P.regexp(/<sup>(.+?)<\/sup>/, 1).map(x => createMfmNode('sup', {}, r.inline.atLeast(1).tryParse(x))),
 	sub: r => P.regexp(/<sub>(.+?)<\/sub>/, 1).map(x => createMfmNode('sub', {}, r.inline.atLeast(1).tryParse(x))),
 	rgbshift: r => P.regexp(/<rgbshift>(.+?)<\/rgbshift>/, 1).map(x => createMfmNode('rgbshift', {}, r.inline.atLeast(1).tryParse(x))),
+	x2: r => P.regexp(/<x2>(.+?)<\/x2>/, 1).map(x => createMfmNode('x2', {}, r.inline.atLeast(1).tryParse(x))),
+	x3: r => P.regexp(/<x3>(.+?)<\/x3>/, 1).map(x => createMfmNode('x3', {}, r.inline.atLeast(1).tryParse(x))),
+	x4: r => P.regexp(/<x4>(.+?)<\/x4>/, 1).map(x => createMfmNode('x4', {}, r.inline.atLeast(1).tryParse(x))),
 
 	center: r => r.startOfLine.then(P.regexp(/<center>([\s\S]+?)<\/center>/, 1).map(x => createMfmNode('center', {}, r.inline.atLeast(1).tryParse(x)))),
 	inlineCode: () => P.regexp(/`([^´\n]+?)`/, 1).map(x => createMfmNode('inlineCode', { code: x })),
@@ -276,8 +283,8 @@ export const mfmLanguage = P.createLanguage({
 		// # + U+20E3 / # + U+FE0F + U+20E3 のような 合字/絵文字異体字セレクタ付きは ハッシュタグ扱いしない
 		if (hashtag.match(/^(\u20e3|\ufe0f)/)) return P.makeFailure(i, 'not a hashtag');
 
-		// # の前に英数字はハッシュタグ扱いしない
-		if (input[i - 1] != null && input[i - 1].match(/[a-z0-9]/i)) return P.makeFailure(i, 'not a hashtag');
+		// # の前に何かあればハッシュタグ扱いしない
+		if (input[i - 1] != null && input[i - 1].match(/[^\s\u200b]/i)) return P.makeFailure(i, 'not a hashtag');
 
 		return P.makeSuccess(i + ('#' + hashtag).length, createMfmNode('hashtag', { hashtag: hashtag }));
 	}),
@@ -322,28 +329,32 @@ export const mfmLanguage = P.createLanguage({
 		return P.alt(name, lcode, vcode, code);
 	},
 	fn: r => {
-		return P.seqObj(
-			P.string('['), ['fn', P.regexp(/[^\s\n\[\]]+/)] as any, P.string(' '), P.optWhitespace, ['text', P.regexp(/[^\n\[\]]+/)] as any, P.string(']'),
-		).map((x: any) => {
-			let name = x.fn;
-			const args = {} as any;
-			const separator = x.fn.indexOf('.');
-			if (separator > -1) {
-				name = x.fn.substr(0, separator);
-				for (const arg of x.fn.substr(separator + 1).split(',')) {
-					const kv = arg.split('=');
-					if (kv.length === 1) {
-						args[kv[0]] = true;
-					} else {
-						args[kv[0]] = kv[1];
-					}
+		return P((input, i) => {
+			const text = input.substr(i);
+			const match = text.match(/^\[([0-9a-z]+)(?:\.([0-9a-z.,=]+))?\s+([^\n\[\]]+)\]/);
+			if (!match) return P.makeFailure(i, 'not a fn');
+
+			const name = match[1];
+			const argsPart = match[2];
+			const content = match[3];
+
+			if (!['tada', 'jelly', 'twitch', 'shake', 'spin', 'jump', 'bounce', 'flip', 'rgbshift', 'x2', 'x3', 'x4', 'font', 'blur'].includes(name)) {
+				return P.makeFailure(i, 'unknown fn name');
+			}
+
+			const args: Record<string, boolean | string> = {};
+			for (const arg of argsPart?.split(',') || []) {
+				const kv = arg.split('=');
+				if (kv[0] == '__proto__') return P.makeFailure(i, 'prototype pollution');
+				if (kv.length === 1) {
+					args[kv[0]] = true;
+				} else {
+					args[kv[0]] = kv[1];
 				}
 			}
-			return createMfmNode('fn', {
-				name,
-				args
-			}, r.inline.atLeast(1).tryParse(x.text));
-		});
+
+			return P.makeSuccess(i + match[0].length, { name, args, content });
+		}).map(x => createMfmNode('fn', { name: x.name, args: x.args }, r.inline.atLeast(1).tryParse(x.content)));
 	},
 	text: () => P.any.map(x => createMfmNode('text', { text: x }))
 });

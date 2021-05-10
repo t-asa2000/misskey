@@ -1,19 +1,16 @@
+import * as http from 'http';
 import * as https from 'https';
+import got from 'got';
+import * as Got from 'got';
+import { getAgentByUrl } from '../../misc/fetch';
 import { sign } from 'http-signature';
 import { URL } from 'url';
 import * as crypto from 'crypto';
-import * as http from 'http';
-import got from 'got';
-import * as Got from 'got';
-
 import config from '../../config';
 import { ILocalUser } from '../../models/user';
-import { httpsAgent, getAgentByUrl } from '../../misc/fetch';
 
 export default async (user: ILocalUser, url: string, object: any) => {
 	const timeout = 10 * 1000;
-
-	const { protocol, hostname, port, pathname, search } = new URL(url);
 
 	const data = JSON.stringify(object);
 
@@ -21,44 +18,37 @@ export default async (user: ILocalUser, url: string, object: any) => {
 	sha256.update(data);
 	const hash = sha256.digest('base64');
 
-	await new Promise((resolve, reject) => {
-		const req = https.request({
-			agent: httpsAgent as https.Agent,
-			protocol,
-			hostname,
-			port,
-			method: 'POST',
-			path: pathname + search,
-			timeout,
-			headers: {
-				'User-Agent': config.userAgent,
-				'Content-Type': 'application/activity+json',
-				'Digest': `SHA-256=${hash}`
-			}
-		}, res => {
-			if (res.statusCode >= 400) {
-				reject(res);
-			} else {
-				resolve();
-			}
-		});
+	const req = got.post<any>(url, {
+		body: data,
+		headers: {
+			'User-Agent': config.userAgent,
+			'Content-Type': 'application/activity+json',
+			'Digest': `SHA-256=${hash}`
+		},
+		timeout,
+		hooks: {
+			beforeRequest: [
+				options => {
+					options.request = (url: URL, opt: http.RequestOptions, callback?: (response: any) => void) => {
+						// Select custom agent by URL
+						opt.agent = getAgentByUrl(url, false);
 
-		sign(req, {
-			authorizationHeaderName: 'Signature',
-			key: user.keypair,
-			keyId: `${config.url}/users/${user._id}#main-key`,
-			headers: ['(request-target)', 'date', 'host', 'digest']
-		});
+						// Wrap original https?.request
+						const requestFunc = url.protocol === 'http:' ? http.request : https.request;
+						const clientRequest = requestFunc(url, opt, callback) as http.ClientRequest;
 
-		req.on('timeout', () => req.abort());
+						// HTTP-Signature
+						signToRequest(clientRequest, user.keypair, `${config.url}/users/${user._id}#main-key`);
 
-		req.on('error', e => {
-			if (req.aborted) reject('timeout');
-			reject(e);
-		});
-
-		req.end(data);
+						return clientRequest;
+					};
+				},
+			],
+		},
+		retry: 0,
 	});
+
+	await receiveResponce(req, 10 * 1024 * 1024);
 };
 
 /**
@@ -88,12 +78,7 @@ export async function signedGet(url: string, user: ILocalUser) {
 						const clientRequest = requestFunc(url, opt, callback) as http.ClientRequest;
 
 						// HTTP-Signature
-						sign(clientRequest, {
-							authorizationHeaderName: 'Signature',
-							key: user.keypair,
-							keyId: `${config.url}/users/${user._id}#main-key`,
-							headers: ['(request-target)', 'host', 'date', 'accept']
-						});
+						signToRequest(clientRequest, user.keypair, `${config.url}/users/${user._id}#main-key`);
 
 						return clientRequest;
 					};
@@ -108,7 +93,22 @@ export async function signedGet(url: string, user: ILocalUser) {
 	return res.body;
 }
 
-export async function receiveResponce<T>(req: Got.CancelableRequest<Got.Response<T>>, maxSize: number) {
+/**
+ * Sign to ClientRequest
+ * @param clientRequest http.ClientRequest
+ * @param key Private key as PEM string
+ * @param keyId KeyID
+ */
+function signToRequest(clientRequest: http.ClientRequest, key: string, keyId: string) {
+	sign(clientRequest, {
+		authorizationHeaderName: 'Signature',
+		key,
+		keyId,
+		headers: ['(request-target)', 'date', 'host', 'digest']
+	});
+}
+
+async function receiveResponce<T>(req: Got.CancelableRequest<Got.Response<T>>, maxSize: number) {
 	// 応答ヘッダでサイズチェック
 	req.on('response', (res: Got.Response) => {
 		const contentLength = res.headers['content-length'];
@@ -135,6 +135,7 @@ export async function receiveResponce<T>(req: Got.CancelableRequest<Got.Response
 			throw {
 				name: `StatusError`,
 				statusCode,
+				statusMessage,
 				message: `${statusCode} ${statusMessage}`,
 			};
 		} else {

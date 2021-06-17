@@ -1,14 +1,14 @@
 import config from '../../config';
 import fetch from 'node-fetch';
 import { getAgentByUrl } from '../../misc/fetch';
-import { genSignedPost, genSignedGet } from './signed-request';
+import { createSignedPost, createSignedGet } from './ap-request';
 import { ILocalUser } from '../../models/user';
 
 export default async (user: ILocalUser, url: string, object: any) => {
 	const body = JSON.stringify(object);
 
-	const req = genSignedPost({ privateKeyPem: user.keypair, keyId: `${config.url}/users/${user._id}#main-key` }, url, body, {
-			'User-Agent': config.userAgent,
+	const req = createSignedPost({ privateKeyPem: user.keypair, keyId: `${config.url}/users/${user._id}#main-key` }, url, body, {
+		'User-Agent': config.userAgent,
 	});
 
 	const timeout = 10 * 1000;
@@ -45,7 +45,7 @@ export default async (user: ILocalUser, url: string, object: any) => {
  * @param url URL to fetch
  */
 export async function signedGet(url: string, user: ILocalUser) {
-	const req = genSignedGet({ privateKeyPem: user.keypair, keyId: `${config.url}/users/${user._id}#main-key` }, url, {
+	const req = createSignedGet({ privateKeyPem: user.keypair, keyId: `${config.url}/users/${user._id}#main-key` }, url, {
 		'User-Agent': config.userAgent,
 	});
 

@@ -28,7 +28,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: node cli/diag-environment.js
-    - run: yarn install
+    - run: yarn install --frozen-lockfile
     - run: yarn build
     - run: cp test/test.yml .config/
     - run: yarn test

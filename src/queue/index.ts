@@ -28,7 +28,11 @@ deliverQueue
 	})
 	.on('active', (job) => deliverLogger.info(`active ${getJobInfo(job, true)} to=${job.data.to}`))
 	.on('completed', (job, result) => deliverLogger.info(`completed(${result}) ${getJobInfo(job, true)} to=${job.data.to}`))
-	.on('failed', (job, err) => deliverLogger.warn(`failed(${err}) ${getJobInfo(job)} to=${job.data.to}`))
+	.on('failed', (job, err) => {
+		const msg = `failed(${err}) ${getJobInfo(job)} to=${job.data.to}`;
+		job.log(msg);
+		deliverLogger.warn(msg);
+	})
 	.on('error', (error) => deliverLogger.error(`error ${error}`))
 	.on('stalled', (job) => deliverLogger.warn(`stalled ${getJobInfo(job)} to=${job.data.to}`));
 
@@ -39,7 +43,11 @@ inboxQueue
 	})
 	.on('active', (job) => inboxLogger.info(`active ${getJobInfo(job, true)} activity=${job.data.activity ? job.data.activity.id : 'none'}`))
 	.on('completed', (job, result) => inboxLogger.info(`completed(${result}) ${getJobInfo(job, true)} activity=${job.data.activity ? job.data.activity.id : 'none'}`))
-	.on('failed', (job, err) => inboxLogger.warn(`failed(${err}) ${getJobInfo(job)} activity=${job.data.activity ? job.data.activity.id : 'none'}`))
+	.on('failed', (job, err) => {
+		const msg = `failed(${err}) ${getJobInfo(job)} activity=${job.data.activity ? job.data.activity.id : 'none'}`;
+		job.log(msg);
+		inboxLogger.warn(msg);
+	})
 	.on('error', (error) => inboxLogger.error(`error ${error}`))
 	.on('stalled', (job) => inboxLogger.warn(`stalled ${getJobInfo(job)} activity=${job.data.activity ? job.data.activity.id : 'none'}`));
 
@@ -86,8 +94,7 @@ export function deliver(user: ILocalUser, content: any, to: string, lowSeverity 
 		attempts,
 		timeout: 1 * 60 * 1000,	// 1min
 		backoff: {
-			type: 'exponential',
-			delay: 60 * 1000
+			type: 'apBackoff'
 		},
 		removeOnComplete: true,
 		removeOnFail: true
@@ -110,8 +117,7 @@ export function inbox(activity: IActivity, signature: httpSignature.IParsedSigna
 		attempts: config.inboxJobMaxAttempts || 8,
 		timeout: 5 * 60 * 1000,	// 5min
 		backoff: {
-			type: 'exponential',
-			delay: 60 * 1000
+			type: 'apBackoff'
 		},
 		removeOnComplete: true,
 		removeOnFail: true

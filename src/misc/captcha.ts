@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { URLSearchParams } from 'url';
-import { getAgentByUrl } from './fetch';
+import { getAgentByUrl } from './agent';
 import config from '../config';
 
 export async function verifyRecaptcha(secret: string, response: string) {

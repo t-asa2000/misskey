@@ -1,6 +1,6 @@
 import * as S3 from 'aws-sdk/clients/s3';
 import { DriveConfig } from '../../config/types';
-import { httpAgent, httpsAgent } from '../../misc/fetch';
+import { getAgentByUrl } from '../../misc/agent';
 
 export function getS3(drive: DriveConfig) {
 	if (drive.config == null) throw 'drive.config is null';
@@ -14,7 +14,7 @@ export function getS3(drive: DriveConfig) {
 			? false
 			: drive.config.s3ForcePathStyle == null ? true : !!drive.config.s3ForcePathStyle,
 		httpOptions: {
-			agent: drive.config.useSSL ? httpsAgent : httpAgent
+			agent: getAgentByUrl(new URL(drive.config.useSSL ? 'https://example.com' : 'http://example.com'), false, true)
 		}
 	});
 }

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as stream from 'stream';
 import * as util from 'util';
 import fetch from 'node-fetch';
-import { httpAgent, httpsAgent } from './fetch';
+import { getAgentByUrl } from './agent';
 import { AbortController } from 'abort-controller';
 import * as ContentDisposition from 'content-disposition';
 import config from '../config';
@@ -28,7 +28,7 @@ export async function downloadUrl(url: string, path: string) {
 		timeout: 30 * 1000,
 		size: config.maxFileSize || 262144000,
 		signal: controller.signal,
-		agent: u => u.protocol == 'http:' ? httpAgent : httpsAgent,
+		agent: getAgentByUrl,
 	});
 
 	if (!response.ok) {

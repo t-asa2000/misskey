@@ -1,4 +1,4 @@
-import { httpAgent, httpsAgent } from '../misc/fetch';
+import { getAgentByUrl } from '../misc/agent';
 import Logger from './logger';
 import config from '../config';
 import fetch from 'node-fetch';
@@ -21,7 +21,7 @@ export async function geoIpLookup(ip: string) {
 		},
 		timeout: 10 * 1000,
 		size: 10 * 1024 * 1024,
-		agent: u => u.protocol == 'http:' ? httpAgent : httpsAgent,
+		agent: getAgentByUrl,
 	});
 
 	if (!res.ok) {

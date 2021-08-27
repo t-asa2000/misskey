@@ -1,5 +1,7 @@
 import * as dns from 'dns';
 import CacheableLookup, { IPFamily } from 'cacheable-lookup';
+import config from '../config';
+import * as IPCIDR from 'ip-cidr';
 const PrivateIp = require('private-ip');
 
 const cache = new CacheableLookup({
@@ -28,10 +30,21 @@ export function limitedLookup(hostname: string, options: dns.LookupOptions, call
 	}, (error, address, family) => {
 		if (error) {
 			callback(error, address, family);
-		} else if (PrivateIp(address)) {
+		} else if (isPrivateIp(address)) {
 			callback(new Error('blocked address'), address, family);
 		} else {
 			callback(error, address, family);
 		}
 	});
+}
+
+function isPrivateIp(address: string) {
+	for (const net of config.allowedPrivateNetworks || []) {
+		const cidr = new IPCIDR(net);
+		if (cidr.contains(address)) {
+			return false;
+		}
+	}
+
+	return PrivateIp(address);
 }

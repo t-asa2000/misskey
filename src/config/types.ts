@@ -47,6 +47,8 @@ export type Source = {
 
 	proxyProxy?: string;
 
+	allowedPrivateNetworks?: string[];
+
 	maxFileSize?: number;
 
 	accesslog?: string;

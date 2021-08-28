@@ -1,10 +1,11 @@
 import * as Router from '@koa/router';
-import { getJson } from '../../misc/fetch';
 import summaly from '../../misc/summaly';
 import fetchMeta from '../../misc/fetch-meta';
 import Logger from '../../services/logger';
 import config from '../../config';
 import { query } from '../../prelude/url';
+import fetch from 'node-fetch';
+import { getAgentByUrl } from '../../misc/agent';
 
 const logger = new Logger('url-preview');
 
@@ -21,7 +22,7 @@ module.exports = async (ctx: Router.RouterContext) => {
 		: `Getting preview of ${ctx.query.url}@${ctx.query.lang} ...`);
 
 	try {
-		const summary = meta.summalyProxy ? await getJson(`${meta.summalyProxy}?${query({
+		const summary = meta.summalyProxy ? await getSummalyProxy(`${meta.summalyProxy}?${query({
 			url: ctx.query.url,
 			lang: ctx.query.lang || 'ja-JP'
 		})}`) : await summaly(ctx.query.url);
@@ -54,4 +55,25 @@ function wrap(url: string): string {
 			})}`
 			: url
 		: null;
+}
+
+export async function getSummalyProxy(url: string) {
+	const res = await fetch(url, {
+		headers: {
+			'User-Agent': config.userAgent,
+			Accept: 'application/json, */*'
+		},
+		timeout: 30000,	// たしかsummaly側多かった気がした
+		agent: getAgentByUrl(new URL(url), false, true),
+	});
+
+	if (!res.ok) {
+		throw {
+			name: `StatusError`,
+			statusCode: res.status,
+			message: `${res.status} ${res.statusText}`,
+		};
+	}
+
+	return await res.json();
 }

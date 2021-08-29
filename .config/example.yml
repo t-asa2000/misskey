@@ -4,6 +4,9 @@ url: https://example.tld/
 # Listen port
 port: 3000
 
+# Listen address (eg: 127.0.0.1, 0.0,0,0, ::)
+addr: '127.0.0.0'
+
 mongodb:
   host: localhost
   port: 27017

@@ -31,5 +31,7 @@ jobs:
     - run: yarn install
     - run: git diff --exit-code yarn.lock
     - run: yarn build
+    - run: sudo apt -y install nginx
+    - run: curl -i http://localhost/
     - run: cp test/test.yml .config/
     - run: yarn test

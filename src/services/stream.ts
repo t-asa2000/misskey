@@ -2,7 +2,7 @@ import * as mongo from 'mongodb';
 import redis from '../db/redis';
 import Xev from 'xev';
 import config from '../config';
-import { PackedNote } from '../models/packed-schemas';
+import { PackedNote, PackedNotification, PackedUser, ThinPackedUser } from '../models/packed-schemas';
 
 type ID = string | mongo.ObjectID;
 
@@ -42,7 +42,20 @@ class Publisher {
 		}
 	}
 
-	public publishMainStream = (userId: ID, type: string, value?: unknown): void => {
+	public publishMainStream(userId: ID, type: 'notification' | 'unreadNotification', value: PackedNotification): void;
+	public publishMainStream(userId: ID, type: 'reply' | 'renote' | 'mention', value: PackedNote): void;
+	public publishMainStream(userId: ID, type: 'unreadMention' | 'unreadSpecifiedNote', value: ID): void;
+	public publishMainStream(userId: ID, type: 'meUpdated', value: PackedUser): void;
+	public publishMainStream(userId: ID, type: 'followed', value: PackedUser): void;
+	public publishMainStream(userId: ID, type: 'follow' | 'unfollow' | 'receiveFollowRequest', value: ThinPackedUser): void;
+	public publishMainStream(userId: ID, type: 'reversiInvited', value: any): void;
+	public publishMainStream(userId: ID, type: 'homeUpdated' | 'mobileHomeUpdated' | 'widgetUpdated', value: any): void;
+	public publishMainStream(userId: ID, type: 'messagingMessage', value: any): void;
+	public publishMainStream(userId: ID, type: 'driveFileCreated', value: any): void;
+	public publishMainStream(userId: ID, type: 'clientSettingUpdated', value: any): void;
+	public publishMainStream(userId: ID, type: 'signin', value: any): void;
+	public publishMainStream(userId: ID, type: 'readAllMessagingMessages' | 'readAllNotifications' | 'readAllUnreadMentions' | 'readAllUnreadSpecifiedNotes' | 'myTokenRegenerated'): void;
+	public publishMainStream(userId: ID, type: string, value?: unknown): void {
 		this.publish(`mainStream:${userId}`, type, typeof value === 'undefined' ? null : value);
 	}
 

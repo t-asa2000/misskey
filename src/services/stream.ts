@@ -1,3 +1,4 @@
+import autobind from 'autobind-decorator';
 import * as mongo from 'mongodb';
 import redis from '../db/redis';
 import Xev from 'xev';
@@ -27,7 +28,8 @@ class Publisher {
 		}
 	}
 
-	private publish = (channel: string, type: string | null, value?: unknown): void => {
+	@autobind
+	private publish(channel: string, type: string | null, value?: unknown): void {
 		const message: PubSubMessage<unknown> | unknown = type == null ? value : value == null ?
 			{ type: type, body: null } :
 			{ type: type, body: value };
@@ -55,54 +57,67 @@ class Publisher {
 	public publishMainStream(userId: ID, type: 'clientSettingUpdated', value: any): void;
 	public publishMainStream(userId: ID, type: 'signin', value: any): void;
 	public publishMainStream(userId: ID, type: 'readAllMessagingMessages' | 'readAllNotifications' | 'readAllUnreadMentions' | 'readAllUnreadSpecifiedNotes' | 'myTokenRegenerated'): void;
+
+	@autobind
 	public publishMainStream(userId: ID, type: string, value?: unknown): void {
 		this.publish(`mainStream:${userId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishDriveStream = (userId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishDriveStream(userId: ID, type: string, value?: unknown): void {
 		this.publish(`driveStream:${userId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishNoteStream = (noteId: ID, type: string, value: unknown): void => {
+	@autobind
+	public publishNoteStream(noteId: ID, type: string, value: unknown): void {
 		this.publish(`noteStream:${noteId}`, type, {
 			id: noteId,
 			body: value
 		} as NoteStreamBody);
 	}
 
-	public publishUserListStream = (listId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishUserListStream(listId: ID, type: string, value?: unknown): void {
 		this.publish(`userListStream:${listId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishMessagingStream = (userId: ID, otherpartyId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishMessagingStream(userId: ID, otherpartyId: ID, type: string, value?: unknown): void {
 		this.publish(`messagingStream:${userId}-${otherpartyId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishMessagingIndexStream = (userId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishMessagingIndexStream(userId: ID, type: string, value?: unknown): void {
 		this.publish(`messagingIndexStream:${userId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishReversiStream = (userId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishReversiStream(userId: ID, type: string, value?: unknown): void {
 		this.publish(`reversiStream:${userId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishReversiGameStream = (gameId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishReversiGameStream(gameId: ID, type: string, value?: unknown): void {
 		this.publish(`reversiGameStream:${gameId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishNotesStream = (note: PackedNote): void => {
+	@autobind
+	public publishNotesStream(note: PackedNote): void {
 		this.publish('notesStream', null, note);
 	}
 
-	public publishHotStream = (note: PackedNote): void => {
+	@autobind
+	public publishHotStream(note: PackedNote): void {
 		this.publish(`hotStream`, null, note);
 	}
 
-	public publishAdminStream = (userId: ID, type: string, value?: unknown): void => {
+	@autobind
+	public publishAdminStream(userId: ID, type: string, value?: unknown): void {
 		this.publish(`adminStream:${userId}`, type, typeof value === 'undefined' ? null : value);
 	}
 
-	public publishServerEvent = (userId: ID | null, type: string, value?: unknown): void => {
+	@autobind
+	public publishServerEvent(userId: ID | null, type: string, value?: unknown): void {
 		const name = userId ? `serverEvent:${userId}` : `serverEvent`;
 		this.publish(name, type, typeof value === 'undefined' ? null : value);
 	}

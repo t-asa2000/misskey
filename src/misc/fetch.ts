@@ -9,15 +9,24 @@ import Logger from '../services/logger';
 
 const logger = new Logger('fetch');
 
-export async function getJson(url: string, accept = 'application/json, */*', timeout = 10000, headers?: Record<string, string>) {
+type GetOptions = {
+	accept?: string;
+	timeout?: number;
+	authorization?: string;
+};
+
+export async function getJson(url: string, opts?: GetOptions) {
+	const headers: Record<string, string> = {
+		'User-Agent': config.userAgent,
+		Accept: opts?.accept || 'application/json, */*',
+	};
+	if (opts?.authorization) headers.Authorization = opts.authorization;
+
 	const res = await getResponse({
 		url,
 		method: 'GET',
-		headers: objectAssignWithLcKey({
-			'User-Agent': config.userAgent,
-			Accept: accept
-		}, headers || {}),
-		timeout
+		headers,
+		timeout: opts?.timeout || 10 * 1000,
 	});
 
 	try {
@@ -31,15 +40,18 @@ export async function getJson(url: string, accept = 'application/json, */*', tim
 	}
 }
 
-export async function getHtml(url: string, accept = 'text/html, */*', timeout = 10000, headers?: Record<string, string>) {
+export async function getHtml(url: string, opts?: GetOptions) {
+	const headers: Record<string, string> = {
+		'User-Agent': config.userAgent,
+		Accept: opts?.accept || 'application/json, */*',
+	};
+	if (opts?.authorization) headers.Authorization = opts.authorization;
+
 	const res = await getResponse({
 		url,
 		method: 'GET',
-		headers: objectAssignWithLcKey({
-			'User-Agent': config.userAgent,
-			Accept: accept
-		}, headers || {}),
-		timeout
+		headers,
+		timeout: opts?.timeout || 10 * 1000,
 	});
 
 	return await res.text();
@@ -75,16 +87,6 @@ export async function getResponse(args: { url: string, method: string, body?: st
 	}
 
 	return res;
-}
-
-function lcObjectKey(src: Record<string, string>) {
-	const dst: Record<string, string> = {};
-	for (const key of Object.keys(src).filter(x => x != '__proto__' && typeof src[x] === 'string')) dst[key.toLowerCase()] = src[key];
-	return dst;
-}
-
-function objectAssignWithLcKey(a: Record<string, string>, b: Record<string, string>) {
-	return Object.assign(lcObjectKey(a), lcObjectKey(b));
 }
 
 //#region Agent

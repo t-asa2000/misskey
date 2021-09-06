@@ -160,8 +160,9 @@ router.get('/gh/cb', async ctx => {
 						res({ accessToken });
 				}));
 
-		const { login, id } = await getJson('https://api.github.com/user', 'application/vnd.github.v3+json', 10 * 1000, {
-			'Authorization': `bearer ${accessToken}`
+		const { login, id } = await getJson('https://api.github.com/user', {
+			accept: 'application/vnd.github.v3+json',
+			authorization: `bearer ${accessToken}`
 		});
 		if (!login || !id) {
 			ctx.throw(400, 'invalid session');

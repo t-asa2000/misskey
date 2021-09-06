@@ -50,7 +50,7 @@ export default class Resolver {
 
 		const object = this.user
 			? await signedGet(value, this.user)
-			: await getJson(value, 'application/activity+json, application/ld+json');
+			: await getJson(value, { accept: 'application/activity+json, application/ld+json' });
 
 		if (object === null || (
 			Array.isArray(object['@context']) ?

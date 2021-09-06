@@ -169,8 +169,9 @@ router.get('/dc/cb', async ctx => {
 					});
 				}));
 
-		const { id, username, discriminator } = await getJson('https://discord.com/api/users/@me', '*/*', 10 * 1000, {
-			'Authorization': `Bearer ${accessToken}`,
+		const { id, username, discriminator } = await getJson('https://discord.com/api/users/@me', {
+			accept: '*/*',
+			authorization: `Bearer ${accessToken}`,
 		});
 
 		if (!id || !username || !discriminator) {
@@ -244,8 +245,8 @@ router.get('/dc/cb', async ctx => {
 						});
 				}));
 
-		const { id, username, discriminator } = await getJson('https://discord.com/api/users/@me', '*/*', 10 * 1000, {
-			'Authorization': `Bearer ${accessToken}`,
+		const { id, username, discriminator } = await getJson('https://discord.com/api/users/@me', {
+			'authorization': `Bearer ${accessToken}`,
 		});
 		if (!id || !username || !discriminator) {
 			ctx.throw(400, 'invalid session');

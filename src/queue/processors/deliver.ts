@@ -66,7 +66,7 @@ export default async (job: Bull.Job<DeliverJobData>) => {
 			if (res.isPermanentError) {
 				// Mastodonから返ってくる401がどうもpermanent errorじゃなさそう
 				if (res.statusCode === 401) {
-					throw res;
+					throw `${res.statusCode} ${res.statusMessage}`;
 				}
 
 				// sharedInboxで410を返されたら閉鎖済みとマークする

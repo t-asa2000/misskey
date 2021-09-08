@@ -42,7 +42,7 @@ export default async function(resolver: Resolver, actor: IRemoteUser, activity: 
 			renote = await resolveNote(targetUri, null, true);
 		} catch (e) {
 			// 対象が4xxならスキップ
-			if (e instanceof StatusError && e.isPermanentError) {
+			if (e instanceof StatusError && e.isClientError) {
 				return `skip: Ignored announce target: ${uri} => ${targetUri} - ${e.statusCode}`;
 			}
 			throw `Error in announce target: ${uri} => ${targetUri} - ${e.statusCode || e}`;

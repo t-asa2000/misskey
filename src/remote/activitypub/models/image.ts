@@ -36,7 +36,7 @@ export async function createImage(actor: IRemoteUser, value: IObject): Promise<I
 		file = await uploadFromUrl(image.url, actor, null, image.url, !!image.sensitive, false, !cache);
 	} catch (e) {
 		// 4xxの場合は添付されてなかったことにする
-		if (e instanceof StatusError && e.isPermanentError) {
+		if (e instanceof StatusError && e.isClientError) {
 			logger.warn(`Ignored image: ${image.url} - ${e.statusCode}`);
 			return null;
 		}

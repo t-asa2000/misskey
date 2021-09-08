@@ -82,7 +82,7 @@ export default async function(ctx: Router.RouterContext) {
 			return await sendNormal(ctx, file.data, file.type);
 		} catch (e) {
 			serverLogger.error(e);
-			return await sendError(ctx, (e instanceof StatusError && e.isPermanentError) ? e.statusCode : 500);
+			return await sendError(ctx, (e instanceof StatusError && e.isClientError) ? e.statusCode : 500);
 		} finally {
 			cleanup();
 		}

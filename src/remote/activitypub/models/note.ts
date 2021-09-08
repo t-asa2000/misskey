@@ -183,7 +183,7 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 				}
 			} catch (e) {
 				return {
-					status: (e instanceof StatusError && e.isPermanentError) ? 'permerror' : 'temperror'
+					status: (e instanceof StatusError && e.isClientError) ? 'permerror' : 'temperror'
 				};
 			}
 		};

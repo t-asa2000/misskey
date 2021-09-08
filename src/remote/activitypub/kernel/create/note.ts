@@ -33,7 +33,7 @@ export default async function(resolver: Resolver, actor: IRemoteUser, note: IObj
 		await createNote(note, resolver, silent);
 		return 'ok';
 	} catch (e) {
-		if (e instanceof StatusError && e.isPermanentError) {
+		if (e instanceof StatusError && e.isClientError) {
 			return `skip ${e.statusCode}`;
 		} else {
 			throw e;

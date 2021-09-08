@@ -63,7 +63,7 @@ export default async (job: Bull.Job<DeliverJobData>) => {
 
 		if (res instanceof StatusError) {
 			// 4xx
-			if (res.isPermanentError) {
+			if (res.isClientError) {
 				// Mastodonから返ってくる401がどうもpermanent errorじゃなさそう
 				if (res.statusCode === 401) {
 					throw `${res.statusCode} ${res.statusMessage}`;

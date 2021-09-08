@@ -59,7 +59,7 @@ export default async function(ctx: Router.RouterContext) {
 			});
 		};
 
-		if (e instanceof StatusError && e.isPermanentError) {
+		if (e instanceof StatusError && e.isClientError) {
 			// 4xx
 			defered();
 			ctx.status = e.statusCode;

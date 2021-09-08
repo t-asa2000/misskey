@@ -40,7 +40,7 @@ export async function proxyMedia(ctx: Router.RouterContext) {
 	} catch (e) {
 		serverLogger.error(e);
 
-		if (e instanceof StatusError && e.isPermanentError) {
+		if (e instanceof StatusError && e.isClientError) {
 			ctx.status = e.statusCode;
 			ctx.set('Cache-Control', 'max-age=86400');
 		} else {

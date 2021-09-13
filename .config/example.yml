@@ -42,6 +42,7 @@ drive:
 #    useSSL: true
 #    accessKey: <accessKey>
 #    secretKey: <secretKey>
+#    useProxy: true
 #    setPublicRead: false
 #    s3ForcePathStyle: true
 #
@@ -60,6 +61,9 @@ drive:
 #     S3: https://<bucket>.s3.amazonaws.com
 #     GCS: https://storage.googleapis.com/<bucket>
 #     Other services: https://s3.example.com/<bucket>
+#
+# * useProxy
+#     Use proxy
 #
 # * setPublicRead
 #     Set to true to set 'public-read' to the file (default: false)
@@ -180,7 +184,7 @@ themeColor: '#fb4e4e'
 #  '127.0.0.1/32'
 #]
 
-# アップロードやリモート取得で処理できるファイルサイズの制限 (bytes)
+# Upload or download file size limits (bytes)
 #maxFileSize: 262144000
 
 # サーバー情報を隠す (default: false)

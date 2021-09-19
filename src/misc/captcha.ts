@@ -40,6 +40,7 @@ async function getCaptchaResponse(url: string, secret: string, response: string)
 		method: 'POST',
 		body: params.toString(),
 		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
 			'User-Agent': config.userAgent
 		},
 		timeout: 10 * 1000,

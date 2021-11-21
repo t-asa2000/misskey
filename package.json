@@ -1,7 +1,7 @@
 {
 	"name": "misskey",
 	"author": "t-asa2000 <info.t.asa2000@gmail.com>",
-	"version": "10.102.525-m544-t-asa1",
+	"version": "10.102.527-m544-t-asa1",
 	"codename": "m544_t-asa",
 	"repository": {
 		"type": "git",

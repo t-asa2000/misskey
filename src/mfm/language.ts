@@ -3,7 +3,7 @@ import { createMfmNode, urlRegex } from './utils';
 import { Predicate } from '../prelude/relation';
 import parseAcct from '../misc/acct/parse';
 import { toUnicode } from 'punycode/';
-import { emojiRegex, vendorEmojiRegex } from '../misc/emoji-regex';
+import { emojiRegex, vendorEmojiRegex, localEmojiRegex } from '../misc/emoji-regex';
 import * as tinycolor from 'tinycolor2';
 
 export function removeOrphanedBrackets(s: string): string {
@@ -74,6 +74,7 @@ export const mfmLanguage = P.createLanguage({
 		r.sup,
 		r.sub,
 		r.rgbshift,
+		r.x1,
 		r.x2,
 		r.x3,
 		r.x4,
@@ -247,6 +248,7 @@ export const mfmLanguage = P.createLanguage({
 	sup: r => P.regexp(/<sup>(.+?)<\/sup>/, 1).map(x => createMfmNode('sup', {}, r.inline.atLeast(1).tryParse(x))),
 	sub: r => P.regexp(/<sub>(.+?)<\/sub>/, 1).map(x => createMfmNode('sub', {}, r.inline.atLeast(1).tryParse(x))),
 	rgbshift: r => P.regexp(/<rgbshift>(.+?)<\/rgbshift>/, 1).map(x => createMfmNode('rgbshift', {}, r.inline.atLeast(1).tryParse(x))),
+	x1: r => P.regexp(/<x1>(.+?)<\/x1>/, 1).map(x => createMfmNode('x1', {}, r.inline.atLeast(1).tryParse(x))),
 	x2: r => P.regexp(/<x2>(.+?)<\/x2>/, 1).map(x => createMfmNode('x2', {}, r.inline.atLeast(1).tryParse(x))),
 	x3: r => P.regexp(/<x3>(.+?)<\/x3>/, 1).map(x => createMfmNode('x3', {}, r.inline.atLeast(1).tryParse(x))),
 	x4: r => P.regexp(/<x4>(.+?)<\/x4>/, 1).map(x => createMfmNode('x4', {}, r.inline.atLeast(1).tryParse(x))),
@@ -325,8 +327,9 @@ export const mfmLanguage = P.createLanguage({
 	emoji: () => {
 		const name = P.regexp(/:(@?[\w-]+(?:@[\w.-]+)?):/i, 1).map(x => createMfmNode('emoji', { name: x }));
 		const vcode = P.regexp(vendorEmojiRegex).map(x => createMfmNode('emoji', { emoji: x, vendor: true }));
+		const lcode = P.regexp(localEmojiRegex).map(x => createMfmNode('emoji', { emoji: x, local: true }));
 		const code = P.regexp(emojiRegex).map(x => createMfmNode('emoji', { emoji: x }));
-		return P.alt(name, vcode, code);
+		return P.alt(name, lcode, vcode, code);
 	},
 	fn: r => {
 		return P((input, i) => {
@@ -338,7 +341,7 @@ export const mfmLanguage = P.createLanguage({
 			const argsPart = match[2];
 			const content = match[3];
 
-			if (!['tada', 'jelly', 'twitch', 'shake', 'spin', 'jump', 'bounce', 'flip', 'rgbshift', 'x2', 'x3', 'x4', 'font', 'blur'].includes(name)) {
+			if (!['tada', 'jelly', 'twitch', 'shake', 'spin', 'jump', 'bounce', 'flip', 'rgbshift', 'x1', 'x2', 'x3', 'x4', 'font', 'blur'].includes(name)) {
 				return P.makeFailure(i, 'unknown fn name');
 			}
 

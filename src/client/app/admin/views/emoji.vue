@@ -1,5 +1,6 @@
 <template>
 <div>
+	<!-- add -->
 	<ui-card>
 		<template #title><fa icon="plus"/> {{ $t('add-emoji.title') }}</template>
 		<section class="fit-top">
@@ -25,12 +26,16 @@
 		</section>
 	</ui-card>
 
+	<!-- list/local -->
 	<ui-card>
 		<template #title><fa :icon="faGrin"/> {{ $t('emojis.title') }}</template>
 		<section style="padding: 16px 32px">
 			<ui-horizon-group searchboxes>
 				<ui-input v-model="searchLocal" type="text" spellcheck="false" @input="fetchEmojis('local', true)">
 					<span>{{ $t('name') }}</span>
+				</ui-input>
+				<ui-input v-model="searchCategory" type="text" spellcheck="false" @input="fetchEmojis('local', true)">
+					<span>{{ $t('add-emoji.category') }}</span>
 				</ui-input>
 			</ui-horizon-group>
 		</section>
@@ -49,6 +54,12 @@
 					<ui-input v-model="emoji.aliases">
 						<span>{{ $t('add-emoji.aliases') }}</span>
 					</ui-input>
+					<ui-select v-model="emoji.direction">
+						<template #label>{{ $t('add-emoji.direction') }}</template>
+						<option value="none">{{ $t('none') }}</option>
+						<option value="left">{{ $t('left') }}</option>
+						<option value="right">{{ $t('right') }}</option>
+					</ui-select>
 				</ui-horizon-group>
 				<ui-input v-model="emoji.url">
 					<template #icon><fa icon="link"/></template>
@@ -66,6 +77,7 @@
 		</section>
 	</ui-card>
 
+	<!-- list/remote -->
 	<ui-card>
 		<template #title><fa :icon="faGrin"/> {{ $t('remoteEmojis') }}</template>
 		<section style="padding: 16px 32px">
@@ -117,6 +129,7 @@ export default Vue.extend({
 			category: '',
 			url: '',
 			aliases: '',
+			direction: 'none',
 			limit: 10,
 			remoteLimit: 50,
 			emojis: [],
@@ -126,6 +139,7 @@ export default Vue.extend({
 			remoteExistMore: false,
 			remoteOffset: 0,
 			searchLocal: '',
+			searchCategory: '',
 			searchRemote: '',
 			searchHost: '',
 			origin: 'all',
@@ -194,6 +208,7 @@ export default Vue.extend({
 				this.$root.api('admin/emoji/list', {
 					remote: false,
 					name: this.searchLocal,
+					category: this.searchCategory || undefined,
 					offset: this.offset,
 					limit: this.limit + 1,
 				}).then((emojis: any[]) => {
@@ -240,7 +255,8 @@ export default Vue.extend({
 				name: emoji.name,
 				category: emoji.category || undefined,
 				url: emoji.url,
-				aliases: emoji.aliases.split(' ').filter(x => x.length > 0)
+				aliases: emoji.aliases.split(' ').filter(x => x.length > 0),
+				direction: (emoji.direction === 'left' || emoji.direction === 'right') ? emoji.direction : undefined,
 			}).then(() => {
 				this.$root.dialog({
 					type: 'success',

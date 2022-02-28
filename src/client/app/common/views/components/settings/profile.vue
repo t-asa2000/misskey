@@ -28,7 +28,7 @@
 					<template #prefix><fa icon="birthday-cake"/></template>
 				</ui-input>
 
-				<ui-horizon-group inputs>
+				<ui-horizon-group inputsx>
 					<ui-input type="file" @change="onAvatarChange">
 						<span>{{ $t('avatar') }}</span>
 						<template #icon><fa icon="image"/></template>
@@ -61,6 +61,10 @@
 						<ui-input v-model="fieldValue3">{{ $t('metadata-content') }}</ui-input>
 					</ui-horizon-group>
 				</details>
+
+				<ui-input v-if="$store.state.i.isVerified" v-model="borderColor">
+					<template #title>{{ $t('borderColor') }}</template>
+				</ui-input>
 
 				<ui-button primary @click="save(true)"><fa :icon="faSave"/> {{ $t('save') }}</ui-button>
 			</ui-form>
@@ -166,6 +170,7 @@ export default Vue.extend({
 			location: null,
 			description: null,
 			birthday: null,
+			borderColor: null,
 			avatarId: null,
 			bannerId: null,
 			isCat: false,
@@ -221,8 +226,7 @@ export default Vue.extend({
 		this.location = this.$store.state.i.profile.location;
 		this.description = this.$store.state.i.description;
 		this.birthday = this.$store.state.i.profile.birthday;
-		this.avatarId = this.$store.state.i.avatarId;
-		this.bannerId = this.$store.state.i.bannerId;
+		this.borderColor = this.$store.state.i.borderColor;
 		this.isCat = this.$store.state.i.isCat;
 		this.isBot = this.$store.state.i.isBot;
 		this.isLocked = this.$store.state.i.isLocked;
@@ -321,6 +325,7 @@ export default Vue.extend({
 				location: this.location || null,
 				description: this.description || null,
 				birthday: this.birthday || null,
+				borderColor: this.borderColor || null,
 				avatarId: this.avatarId || undefined,
 				bannerId: this.bannerId || undefined,
 				isCat: !!this.isCat,
@@ -484,6 +489,12 @@ export default Vue.extend({
 		},
 
 		async deleteAccount() {
+			const { canceled: canceled2 } = await this.$root.dialog({
+				title: this.$t('delete-account-confirm'),
+				showCancelButton: true
+			});
+			if (canceled2) return;
+
 			const { canceled: canceled, result: password } = await this.$root.dialog({
 				title: this.$t('enter-password'),
 				input: {
@@ -491,12 +502,6 @@ export default Vue.extend({
 				}
 			});
 			if (canceled) return;
-
-			const { canceled: canceled2 } = await this.$root.dialog({
-				title: this.$t('delete-account-confirm'),
-				showCancelButton: true
-			});
-			if (canceled2) return;
 
 			this.$root.api('i/delete-account', {
 				password

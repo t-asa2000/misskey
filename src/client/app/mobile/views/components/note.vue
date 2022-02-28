@@ -34,6 +34,7 @@
 			'coloring-bg': $store.state.device.visibilityColoring === 'bg',
 			'coloring-left': $store.state.device.visibilityColoring === 'left',
 		}"
+		:style="{ boxShadow: `inset 0 0 3px 3px ${appearNote.user.borderColor || 'transparent'}` }"
 	>
 		<mk-avatar class="avatar" :user="appearNote.user" v-if="$store.state.device.postStyle != 'smart'"/>
 		<div class="main">
@@ -62,7 +63,7 @@
 			<footer v-if="appearNote.deletedAt == null && !preview" class="footer">
 				<mk-reactions-viewer :note="appearNote" ref="reactionsViewer"/>
 				<button @click="reply()" class="button">
-					<fa :icon="appearNote.reply ? 'reply-all' : 'reply'"/>
+					<fa icon="reply"/>
 					<p class="count" v-if="appearNote.repliesCount + appearNote.quoteCount > 0">{{ appearNote.repliesCount + appearNote.quoteCount }}</p>
 				</button>
 				<button v-if="appearNote.myRenoteId != null" @click="undoRenote()" title="Undo" class="button renoted">

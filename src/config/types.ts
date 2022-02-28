@@ -23,11 +23,6 @@ export type Source = {
 		db?: number;
 		prefix?: string;
 	};
-	elasticsearch: {
-		host: string;
-		port: number;
-		pass: string;
-	};
 	drive?: DriveConfig;
 	remoteDrive?: DriveConfig;
 	proxyRemoteFiles?: boolean;
@@ -76,6 +71,7 @@ export type Source = {
 		mecabBin?: string;
 		mecabDic?: string;
 		mecabServer?: string;
+		mecabNeologd?: boolean;
 	};
 
 	icons?: Icons
@@ -83,6 +79,7 @@ export type Source = {
 
 	hideServerInfo?: boolean;
 	minimumAge?: number;
+	homeTlActiveLimitDays?: number;
 };
 
 export type DriveConfig = {

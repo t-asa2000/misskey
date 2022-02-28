@@ -33,6 +33,7 @@
 			'coloring-bg': $store.state.device.visibilityColoring === 'bg',
 			'coloring-left': $store.state.device.visibilityColoring === 'left',
 		}"
+		:style="{ boxShadow: `inset 0 0 3px 3px ${appearNote.user.borderColor || 'transparent'}` }"
 	>
 		<mk-avatar class="avatar" :user="appearNote.user"/>
 		<div class="main">
@@ -71,7 +72,7 @@
 				<span class="app" v-if="appearNote.app && narrow && detail && $store.state.settings.showVia">via <b>{{ appearNote.app.name }}</b></span>
 				<mk-reactions-viewer :note="appearNote" ref="reactionsViewer"/>
 				<button class="replyButton button" @click="reply()" :title="$t('reply')">
-					<fa :icon="appearNote.reply ? 'reply-all' : 'reply'"/>
+					<fa icon="reply"/>
 					<p class="count" v-if="appearNote.repliesCount + appearNote.quoteCount > 0">{{ appearNote.repliesCount + appearNote.quoteCount }}</p>
 				</button>
 				<button v-if="appearNote.myRenoteId != null" class="renoteButton button renoted" @click="undoRenote()" title="Undo">

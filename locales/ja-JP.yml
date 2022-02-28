@@ -110,6 +110,8 @@ common:
   aboutInstance: "このインスタンスについて"
   favoriteReactions: "よくするリアクション"
   mostReacteds: "よくされるリアクション"
+  frequently-replied-users: "よく話すユーザー"
+  host: "ホスト"
 
   favorites: "お気に入り"
   noteReactions: "リアクションした投稿"
@@ -274,7 +276,7 @@ common:
     suggest-recent-hashtags: "最近のハッシュタグを投稿フォームに表示する"
     always-show-nsfw: "常に閲覧注意のメディアを表示する"
     alwaysOpenCw: "最初からCW/閲覧注意のコンテンツを表示する"
-    always-mark-nsfw: "常にメディアを閲覧注意として投稿"
+    always-mark-nsfw: "デフォルトでファイルを閲覧注意にする"
     show-full-acct: "ユーザー名のホストを省略しない"
     show-via: "viaを表示する"
     reduce-motion: "UIの動きを減らす"
@@ -314,7 +316,7 @@ common:
     show-my-renotes: "自分の行ったRenoteをタイムラインに表示する"
     show-renoted-my-notes: "自分の投稿のRenoteをタイムラインに表示する"
     show-local-renotes: "ローカルの投稿のRenoteをタイムラインに表示する"
-    excludeForeignReply: "フォロー外へのリプライを隠す"
+    includeForeignReply: "他人へのリプライを含める"
     sound: "サウンド"
     enable-sounds: "サウンドを有効にする"
     enable-sounds-desc: "投稿やメッセージを送受信したときなどにサウンドを再生します。この設定はブラウザに記憶されます。"
@@ -696,9 +698,7 @@ common/views/components/note-menu.vue:
   deleteDriveNo: "ドライブのファイルは削除しない"
   deleteDriveYes: "ドライブのファイルも削除する"
   edit: "編集"
-  edit-confirm: "この投稿を編集しますか？この投稿へのリアクション、Renote、返信も全て削除されます。"
-  delete-and-edit: "削除して編集"
-  delete-and-edit-confirm: "この投稿を削除してもう一度編集しますか？この投稿へのリアクション、リノート、返信も全て削除されます。"
+  edit-confirm: "この投稿を編集しますか？古い投稿は削除されます。"
   remote: "投稿元で見る"
   pin-limit-exceeded: "これ以上ピン留めできません。"
   report: "通報"
@@ -1468,6 +1468,7 @@ desktop/views/components/users-list-item.vue:
 
 desktop/views/components/window.vue:
   popout: "ポップアウト"
+  transparent: "透過"
   close: "閉じる"
 
 desktop/views/home/featured.vue:
@@ -1654,15 +1655,17 @@ admin/views/drive.vue:
     sizeDesc: "サイズが大きい順"
   origin:
     title: "オリジン"
-    combined: "ローカル+リモート"
+    combined: "すべて"
     local: "ローカル"
     remote: "リモート"
+    system: "システム"
   delete: "削除"
   deleted: "削除しました"
   mark-as-sensitive: "閲覧注意に設定"
   unmark-as-sensitive: "閲覧注意を解除"
   marked-as-sensitive: "閲覧注意に設定しました"
   unmarked-as-sensitive: "閲覧注意を解除しました"
+  fileId: "ファイルID"
 
 admin/views/users.vue:
   operation: "操作"
@@ -1742,6 +1745,7 @@ admin/views/emoji.vue:
     add: "追加"
     info: "50KB以下のPNG画像をおすすめします。"
     added: "絵文字を登録しました"
+    direction: "顔の方向"
   emojis:
     title: "絵文字一覧"
     update: "更新"
@@ -1760,6 +1764,9 @@ admin/views/emoji.vue:
   origin: "対象"
   all: "全て"
   newer: "未追加"
+  none: "不定"
+  left: "向かって左"
+  right: "向かって右"
 
 admin/views/announcements.vue:
   announcements: "お知らせ"
@@ -2203,6 +2210,10 @@ deck/deck.user-column.vue:
   timeline: "タイムライン"
   pinned-notes: "ピン留めされた投稿"
   fetch-posts: 投稿を取得
+  years-old: "{age}歳"
+  year: "年"
+  month: "月"
+  day: "日"
 
 docs:
   edit-this-page-on-github: "間違いや改善点を見つけましたか？"

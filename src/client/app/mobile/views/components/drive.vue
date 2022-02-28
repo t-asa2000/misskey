@@ -18,7 +18,6 @@
 	<mk-uploader ref="uploader"/>
 	<div class="browser" :class="{ fetching }" v-if="file == null">
 		<div class="info" v-if="info">
-			<p v-if="folder == null">{{ (info.usage / info.capacity * 100).toFixed(1) }}% {{ $t('used') }}</p>
 			<p v-if="folder != null && (folder.foldersCount > 0 || folder.filesCount > 0)">
 				<template v-if="folder.foldersCount > 0">{{ folder.foldersCount }} {{ $t('folder-count') }}</template>
 				<template v-if="folder.foldersCount > 0 && folder.filesCount > 0">{{ $t('count-separator') }}</template>
@@ -485,6 +484,12 @@ export default Vue.extend({
 				folderId: this.folder.id
 			}).then(folder => {
 				this.cd(this.folder.parentId);
+			}).catch((e: any) => {
+				this.$root.dialog({
+					type: 'error',
+					title: 'Error',
+					text: e.message || e
+				});
 			});
 		}
 	}

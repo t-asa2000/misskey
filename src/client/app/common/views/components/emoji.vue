@@ -1,6 +1,6 @@
 <template>
 <!-- カスタム絵文字 -->
-<img v-if="customEmoji" class="fvgwvorwhxigeolkkrcderjzcawqrscl custom" :class="{ normal: normal }" :src="url" :alt="alt" :title="title"/>
+<img v-if="customEmoji" class="fvgwvorwhxigeolkkrcderjzcawqrscl custom" :class="{ normal: normal, flip: requireFlip }" :src="url" :alt="alt" :title="title"/>
 <!-- 絵文字 Vendor (OS, Browser) -->
 <span v-else-if="char && vendor">{{ char }}</span>
 <!-- 絵文字 General -->
@@ -16,6 +16,7 @@
 import Vue from 'vue';
 import { getStaticImageUrl } from '../../../common/scripts/get-static-image-url';
 import { twemojiSvgBase } from '../../../../../misc/twemoji-base';
+import { localEmojiRegex } from '../../../../../misc/emoji-regex';
 
 const tw2full: Record<string, string> = {
 	'0023-20e3': '0023-fe0f-20e3',
@@ -270,6 +271,10 @@ export default Vue.extend({
 			type: Boolean,
 			default: false
 		},
+		direction: {
+			type: String,
+			default: 'none'
+		},
 	},
 
 	data() {
@@ -277,7 +282,8 @@ export default Vue.extend({
 			url: null,
 			fallbackUrl: undefined,
 			char: null,
-			customEmoji: null
+			customEmoji: null,
+			requireFlip: false,
 		}
 	},
 
@@ -310,6 +316,7 @@ export default Vue.extend({
 					this.url = this.$store.state.device.disableShowingAnimatedImages
 						? getStaticImageUrl(customEmoji.url)
 						: customEmoji.url;
+					this.requireFlip = (this.direction === 'right' && customEmoji.direction === 'left') || (this.direction === 'left' && customEmoji.direction === 'right');
 				}
 			}
 		},
@@ -323,6 +330,7 @@ export default Vue.extend({
 				this.url = this.$store.state.device.disableShowingAnimatedImages
 					? getStaticImageUrl(customEmoji.url)
 					: customEmoji.url;
+					this.requireFlip = (this.direction === 'right' && customEmoji.direction === 'left') || (this.direction === 'left' && customEmoji.direction === 'right');
 			} else {
 				//const emoji = lib[this.name];
 				//if (emoji) {
@@ -339,6 +347,14 @@ export default Vue.extend({
 			// 合字をサロゲートペア単位で分割
 			let codes: string[] = Array.from(this.char).map(x => x.codePointAt(0).toString(16));
 			codes = codes.filter(x => x && x.length);
+			// ローカル定義Twemoji
+			if (this.local || (this.isReaction && this.char.match(localEmojiRegex))) {
+				// Twemojiライクに、200d(joiner) を含まない場合は 最後の fe0f (絵文字セレクタを削除する)
+				if (!codes.includes('200d')) codes = codes.filter(x => x != 'fe0f');
+				// で、参照先はTwemoji CDNじゃなくて...
+				this.url = `https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u${codes.join('-')}.svg`;
+				return;
+			}
 
 			// 絵文字フレーバー
 			if (flavor === 'google' || flavor === 'apple' || flavor === 'facebook') {
@@ -372,6 +388,9 @@ export default Vue.extend({
 		height 2.5em
 		vertical-align middle
 		transition transform 0.2s ease
+
+		&.flip
+			transform scaleX(-1)
 
 		&:hover
 			transform scale(1.2)

@@ -34,6 +34,7 @@ export type ThinPackedNote = {
 
 	visibleUserIds: string[];
 	mentions: string[];
+	hasRemoteMentions: boolean;
 
 	notHaveDecorationMfm?: boolean;
 
@@ -56,10 +57,15 @@ export type ThinPackedUser = {
 	avatarUrl: string | null;
 	avatarColor: string | null;
 	isAdmin: boolean;
+	isVerified?: boolean;
+	borderColor?: string | null;
 	isBot: boolean;
 	isCat: boolean;
 	instance: any;	// TODO
 	avoidSearchIndex?: boolean;
+	tags: string[];
+	url?: string | null;
+	uri?: string | null;
 	emojis: {
 		name: string;
 		url: string;
@@ -80,7 +86,6 @@ export type PackedUser = ThinPackedUser & {
 		birthday?: string | null;
 		location?: string | null;
 	};
-	tags?: string[];
 	fields?: {
 		name: string;
 		value: string;
@@ -94,7 +99,6 @@ export type PackedUser = ThinPackedUser & {
 	usertags?: string[];
 
 	// local
-	isVerified?: boolean;
 	isModerator?: boolean;
 	twoFactorEnabled?: boolean;
 	twitter?: {
@@ -110,10 +114,6 @@ export type PackedUser = ThinPackedUser & {
 		username: string;
 		discriminator: string;
 	};
-
-	// remote
-	url?: string | null;
-	uri?: string | null;
 
 	// my
 	avatarId?: string | null;

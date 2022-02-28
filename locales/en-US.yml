@@ -108,6 +108,8 @@ common:
   aboutInstance: "About this instance"
   favoriteReactions: "Favorite reactions"
   mostReacteds: "Most reacteds"
+  frequently-replied-users: "Frequent mentions"
+  host: "Host"
 
   favorites: "Favorites"
   noteReactions: "Reacted notes"
@@ -258,7 +260,7 @@ common:
     suggest-recent-hashtags: "Show recent popular hashtags on the post form"
     always-show-nsfw: "Always show NSFW contents"
     alwaysOpenCw: "Show CW/NSFW content from the beginning"
-    always-mark-nsfw: "Always mark posts with media attachments as NSFW"
+    always-mark-nsfw: "Mark as NSFW by default"
     show-full-acct: "Do not omit the hostname from the username"
     show-via: "Show via"
     reduce-motion: "Reduce motion in UI"
@@ -652,9 +654,7 @@ common/views/components/note-menu.vue:
   deleteDriveNo: "Stay drive files"
   deleteDriveYes: "Delete drive files too"
   edit: "Edit"
-  edit-confirm: "Are you sure you want to edit this post? You will lose all reactions, renotes and replies to it."
-  delete-and-edit: "Delete and edit"
-  delete-and-edit-confirm: "Are you sure you want to delete this post for editing? The reactions and renotes are also deleted."
+  edit-confirm: "Are you sure you want to edit this post? Old post will be deleted."
   remote: "Show original note"
   report: "Report"
   report-abuse-detail: "What kind of nuisance did you encounter?"
@@ -1331,6 +1331,7 @@ desktop/views/components/users-list-item.vue:
   followed: "Follows you"
 desktop/views/components/window.vue:
   popout: "Pop-out"
+  transparent: "Transparent"
   close: "Close"
 desktop/views/home/featured.vue:
   options: "Options"
@@ -1501,15 +1502,17 @@ admin/views/drive.vue:
     sizeDesc: "Size - Largest First"
   origin:
     title: "Origin"
-    combined: "Local + Remote"
+    combined: "All"
     local: "Local"
     remote: "Remote"
+    system: "System"
   delete: "Delete"
   deleted: "Deleted successfully"
   mark-as-sensitive: "Mark as 'sensitive'"
   unmark-as-sensitive: "Unmark as 'sensitive'"
   marked-as-sensitive: "Set a sensitive content notice"
   unmarked-as-sensitive: "Remove the sensitive content notice"
+  fileId: "File ID"
 admin/views/users.vue:
   operation: "Operations"
   username-or-userid: "Username or user ID"
@@ -1582,6 +1585,7 @@ admin/views/emoji.vue:
     add: "Add"
     info: "We recommend PNG images under 50KB."
     added: "Emoji was added"
+    direction: "Face direction"
   emojis:
     title: "Emojis"
     update: "Update"
@@ -1600,6 +1604,9 @@ admin/views/emoji.vue:
   origin: "Origin"
   all: "All"
   newer: "Newer"
+  none: "None"
+  left: "Left"
+  right: "Right"
 
 admin/views/announcements.vue:
   announcements: "Announcements"
@@ -1984,6 +1991,10 @@ deck/deck.user-column.vue:
   timeline: "Timeline"
   pinned-notes: "Pinned posts"
   fetch-posts: "Fetch posts"
+  years-old: "{age} years old"
+  year: "/"
+  month: "/"
+  day: "-"
 docs:
   edit-this-page-on-github: "Found an error, or do you want to contribute to the documentation?"
   edit-this-page-on-github-link: "Edit this page at GitHub!"

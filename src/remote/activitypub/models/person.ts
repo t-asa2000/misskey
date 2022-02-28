@@ -125,8 +125,8 @@ export async function createPerson(uri: string, resolver?: Resolver): Promise<IR
 	logger.info(`Creating the Person: ${person.id}`);
 
 	const [followersCount = 0, followingCount = 0, notesCount = 0] = await Promise.all([
-		getCollectionCount(person.followers, resolver).catch(() => undefined),
-		getCollectionCount(person.following, resolver).catch(() => undefined),
+		0,
+		0,
 		getCollectionCount(person.outbox, resolver).catch(() => undefined),
 	]);
 
@@ -243,8 +243,8 @@ export async function createPerson(uri: string, resolver?: Resolver): Promise<IR
 	const bannerId = banner ? banner._id : null;
 	const avatarUrl = getDriveFileUrl(avatar, true);
 	const bannerUrl = getDriveFileUrl(banner, false);
-	const avatarColor = avatar && avatar.metadata?.properties.avgColor ? avatar.metadata.properties.avgColor : null;
-	const bannerColor = banner && banner.metadata?.properties.avgColor ? banner.metadata.properties.avgColor : null;
+	const avatarColor = null;
+	const bannerColor = null;
 
 	await User.update({ _id: user._id }, {
 		$set: {
@@ -316,9 +316,9 @@ export async function updatePerson(uri: string, resolver?: Resolver, hint?: IAct
 
 	logger.info(`Updating the Person: ${person.id}`);
 
-	const [followersCount = 0, followingCount = 0, notesCount = 0] = await Promise.all([
-		getCollectionCount(person.followers, resolver).catch(() => undefined),
-		getCollectionCount(person.following, resolver).catch(() => undefined),
+	const [followersCount = -1, followingCount = -1, notesCount = 0] = await Promise.all([
+		0,
+		0,
 		getCollectionCount(person.outbox, resolver).catch(() => undefined),
 	]);
 
@@ -381,13 +381,13 @@ export async function updatePerson(uri: string, resolver?: Resolver, hint?: IAct
 	if (avatar) {
 		updates.avatarId = avatar._id;
 		updates.avatarUrl = getDriveFileUrl(avatar, true);
-		updates.avatarColor = avatar.metadata?.properties.avgColor ? avatar.metadata.properties.avgColor : null;
+		updates.avatarColor = null;
 	}
 
 	if (banner) {
 		updates.bannerId = banner._id;
 		updates.bannerUrl = getDriveFileUrl(banner, true);
-		updates.bannerColor = banner.metadata?.properties.avgColor ? banner.metadata.properties.avgColor : null;
+		updates.bannerColor = null;
 	}
 
 	// Update user
@@ -422,7 +422,7 @@ export async function updatePerson(uri: string, resolver?: Resolver, hint?: IAct
  * Misskeyに対象のPersonが登録されていればそれを返し、そうでなければ
  * リモートサーバーからフェッチしてMisskeyに登録しそれを返します。
  */
-export async function resolvePerson(uri: string, verifier?: string | null, resolver?: Resolver): Promise<IUser> {
+export async function resolvePerson(uri: string, verifier?: string | null, resolver?: Resolver, noResolve = false): Promise<IUser> {
 	if (typeof uri !== 'string') throw 'uri is not string';
 
 	//#region このサーバーに既に登録されていたらそれを返す
@@ -432,6 +432,10 @@ export async function resolvePerson(uri: string, verifier?: string | null, resol
 		return exist;
 	}
 	//#endregion
+
+	if (noResolve) {
+		throw new StatusError('Resolve skipped', 400, 'Resolve skipped');
+	}
 
 	// リモートサーバーからフェッチしてきて登録
 	if (resolver == null) resolver = new Resolver();

@@ -59,6 +59,13 @@ export const meta = {
 			}
 		},
 
+		borderColor: {
+			validator: $.optional.nullable.str,
+			desc: {
+				'ja-JP': 'borderColor'
+			}
+		},
+
 		avatarId: {
 			validator: $.optional.nullable.type(ID),
 			transform: transform,
@@ -255,6 +262,15 @@ export default define(meta, async (ps, user, app) => {
 
 		updates['profile.birthday'] = ps.birthday;
 	}
+
+	if (ps.borderColor !== undefined) {
+		if (typeof ps.borderColor === 'string' && user.isVerified && ps.borderColor.match(/^#[0-9A-Fa-f]{6,8}$/)) {
+			updates.borderColor = ps.borderColor;
+		} else {
+			updates.borderColor = null;
+		}
+	}
+
 	if (ps.avatarId !== undefined) updates.avatarId = ps.avatarId;
 	if (ps.bannerId !== undefined) updates.bannerId = ps.bannerId;
 	if (ps.wallpaperId !== undefined) updates.wallpaperId = ps.wallpaperId;
@@ -282,14 +298,10 @@ export default define(meta, async (ps, user, app) => {
 		if (avatar == null) throw new ApiError(meta.errors.noSuchAvatar);
 		if (!avatar.contentType.startsWith('image/')) throw new ApiError(meta.errors.avatarNotAnImage);
 
-		if (avatar.metadata.deletedAt) {
+		if (avatar.metadata?.deletedAt) {
 			updates.avatarUrl = null;
 		} else {
 			updates.avatarUrl = getDriveFileUrl(avatar, true);
-
-			if (avatar.metadata.properties.avgColor) {
-				updates.avatarColor = avatar.metadata.properties.avgColor;
-			}
 		}
 	}
 
@@ -301,14 +313,10 @@ export default define(meta, async (ps, user, app) => {
 		if (banner == null) throw new ApiError(meta.errors.noSuchBanner);
 		if (!banner.contentType.startsWith('image/')) throw new ApiError(meta.errors.bannerNotAnImage);
 
-		if (banner.metadata.deletedAt) {
+		if (banner.metadata?.deletedAt) {
 			updates.bannerUrl = null;
 		} else {
 			updates.bannerUrl = getDriveFileUrl(banner, false);
-
-			if (banner.metadata.properties.avgColor) {
-				updates.bannerColor = banner.metadata.properties.avgColor;
-			}
 		}
 	}
 
@@ -323,14 +331,10 @@ export default define(meta, async (ps, user, app) => {
 
 			if (wallpaper == null) throw new Error('wallpaper not found');
 
-			if (wallpaper.metadata.deletedAt) {
+			if (wallpaper.metadata?.deletedAt) {
 				updates.wallpaperUrl = null;
 			} else {
 				updates.wallpaperUrl = getDriveFileUrl(wallpaper);
-
-				if (wallpaper.metadata.properties.avgColor) {
-					updates.wallpaperColor = wallpaper.metadata.properties.avgColor;
-				}
 			}
 		}
 	}

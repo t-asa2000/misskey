@@ -37,6 +37,10 @@ export const meta = {
 			validator: $.optional.str
 		},
 
+		category: {
+			validator: $.optional.str
+		},
+
 		host: {
 			validator: $.optional.nullable.str
 		}
@@ -54,6 +58,10 @@ export default define(meta, async (ps) => {
 
 	if (ps.host !== undefined) {
 		query.host = ps.host;
+	}
+
+	if (ps.category) {
+		query.category = ps.category;
 	}
 
 	if (ps.newer) {
@@ -82,5 +90,6 @@ export default define(meta, async (ps) => {
 		url: getEmojiUrl(e),
 		type: e.type,
 		md5: e.md5,
+		direction: e.direction,
 	}));
 });

@@ -1,4 +1,3 @@
-import es from '../../db/elasticsearch';
 import Note, { pack, INote, IChoice } from '../../models/note';
 import User, { isLocalUser, IUser, isRemoteUser, IRemoteUser, ILocalUser, getMute } from '../../models/user';
 import { publishMainStream, publishNotesStream } from '../stream';
@@ -9,8 +8,6 @@ import renderAnnounce from '../../remote/activitypub/renderer/announce';
 import { renderActivity } from '../../remote/activitypub/renderer';
 import DriveFile, { IDriveFile } from '../../models/drive-file';
 import { createNotification } from '../../services/create-notification';
-import NoteWatching from '../../models/note-watching';
-import watch from './watch';
 import { parseBasic } from '../../mfm/parse';
 import { IApp } from '../../models/app';
 import resolveUser from '../../remote/resolve-user';
@@ -20,7 +17,6 @@ import { updateHashtags } from '../update-hashtag';
 import isQuote from '../../misc/is-quote';
 import notesChart from '../../services/chart/notes';
 import perUserNotesChart from '../../services/chart/per-user-notes';
-import activeUsersChart from '../../services/chart/active-users';
 import instanceChart from '../../services/chart/instance';
 
 import { erase, concat, unique } from '../../prelude/array';
@@ -255,8 +251,6 @@ export default async (user: IUser, data: Option, silent = false) => {
 		// 統計を更新
 		notesChart.update(note, true);
 		perUserNotesChart.update(user, note, true);
-		// ローカルユーザーのチャートはタイムライン取得時に更新しているのでリモートユーザーの場合だけでよい
-		if (isRemoteUser(user)) activeUsersChart.update(user);
 
 		// Register host
 		if (isRemoteUser(user)) {
@@ -337,14 +331,6 @@ export default async (user: IUser, data: Option, silent = false) => {
 
 		// If has in reply to note
 		if (data.reply) {
-			// Fetch watchers
-			nmRelatedPromises.push(notifyToWatchersOfReplyee(data.reply, user, nm));
-
-			// この投稿をWatchする
-			if (isLocalUser(user) && user.settings.autoWatch !== false) {
-				watch(user._id, data.reply);
-			}
-
 			// 通知
 			if (isLocalUser(data.reply._user)) {
 				nm.push(data.reply.userId, 'reply');
@@ -362,14 +348,6 @@ export default async (user: IUser, data: Option, silent = false) => {
 			// Notify
 			if (isLocalUser(data.renote._user)) {
 				nm.push(data.renote.userId, type);
-			}
-
-			// Fetch watchers
-			nmRelatedPromises.push(notifyToWatchersOfRenotee(data.renote, user, nm, type));
-
-			// この投稿をWatchする
-			if (isLocalUser(user) && user.settings.autoWatch !== false) {
-				watch(user._id, data.renote);
 			}
 
 			// Publish event
@@ -589,49 +567,6 @@ function index(note: INote) {
 			});
 		}
 	}
-
-	if (!note.text || !config.elasticsearch) return;
-
-	if (es) {
-		es.index({
-			index: 'misskey',
-			type: 'note',
-			id: note._id.toString(),
-			body: {
-				text: note.text
-			}
-		});
-	}
-}
-
-async function notifyToWatchersOfRenotee(renote: INote, user: IUser, nm: NotificationManager, type: NotificationType) {
-	const watchers = await NoteWatching.find({
-		noteId: renote._id,
-		userId: { $ne: user._id }
-	}, {
-			fields: {
-				userId: true
-			}
-		});
-
-	for (const watcher of watchers) {
-		nm.push(watcher.userId, type);
-	}
-}
-
-async function notifyToWatchersOfReplyee(reply: INote, user: IUser, nm: NotificationManager) {
-	const watchers = await NoteWatching.find({
-		noteId: reply._id,
-		userId: { $ne: user._id }
-	}, {
-			fields: {
-				userId: true
-			}
-		});
-
-	for (const watcher of watchers) {
-		nm.push(watcher.userId, 'reply');
-	}
 }
 
 async function notifyExtended(note: INote, nm: NotificationManager) {
@@ -701,8 +636,7 @@ function saveReply(reply: INote, note: INote) {
 function incNotesCountOfUser(user: IUser) {
 	User.update({ _id: user._id }, {
 		$set: {
-			updatedAt: new Date(),
-			lastActivityAt: new Date()
+			updatedAt: new Date()
 		},
 		$inc: {
 			notesCount: 1

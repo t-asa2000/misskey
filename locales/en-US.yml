@@ -101,6 +101,13 @@ common:
   only-not-followed: "Only not followed users"
   only-not-following: "Only not following users"
   only-moved: "Moved users only"
+  allAttached: "All attach states"
+  attached: "Attached"
+  notAttached: "Not attached"
+  allType: "All types"
+  image: "Image"
+  video: "Video"
+  audio: "Audio"
   desktop-mode: 'Desktop mode'
   mobile-mode: 'Mobile mode'
   empty: 'Empty'
@@ -115,6 +122,7 @@ common:
   noteReactions: "Reacted notes"
   poll_finished: "Poll finished"
   flush: "Clear cache"
+  signinOrUsePostUrl: "To do so, either signin or put the URL into your instance's search box and do it."
   permissions:
     "read:account": "View your account information"
     "write:account": "Edit your account information"
@@ -363,6 +371,7 @@ common:
         low: "Low"
         cheep: "Cheep"
       useOrthographicCamera: "Use Orthographic Camera"
+    nitter: "Alternate domains for Twitter"
   search: "Search"
   delete: "Delete"
   loading: "Loading"
@@ -371,6 +380,9 @@ common:
   update-available-title: "Update available"
   update-available: "A new version of Misskey is now available({newer}, the current version is {current}). Reload the page to apply updates."
   my-token-regenerated: "Your token has been regenerated, so you will be signed out."
+  admin-user: "Administrator account"
+  bot-user: "Bot account"
+  cat-user: "Cat account"
   verified-user: "Verified account"
   hide-password: "Hide Password"
   show-password: "Show Password"
@@ -423,12 +435,14 @@ common:
     hashtags: "Hashtags"
     words: "Trend words"
     queue: "Queue"
+    sunmoon: "Sun and moon"
+    aichan: "Ai-chan"
   dev: "Failed to create the application. Please try again."
   ai-chan-kawaii: "Ai-chan kawaii!"
   you: "You"
   startTalk: "Start chat"
   addUsertag: "Add usertag"
-  addUsertagDetail: "The usertag cannot be seen by other users, you can suggest it with the @tag"
+  addUsertagDetail: "The usertag cannot be seen by other users. Can be used in user search."
   removeUsertagConfirm: "Are you sure you want to delete this user tag?"
 
 auth/views/form.vue:
@@ -487,6 +501,7 @@ common/views/components/url-preview.vue:
   disable-player: "Close the player"
   expandTweet: "Expand tweet"
   collapseTweet: "Collapse tweet"
+  alternativeLink: "Alternative link"
 
 common/views/components/user-list.vue:
   no-users: "There are no users."
@@ -558,6 +573,8 @@ common/views/components/connect-failed.troubleshooter.vue:
   success-desc: "Looks like we have a connection. Please reload the page."
   flush: "Clean cache"
   set-version: "Specify version"
+common/views/components/instance.vue:
+  start: "Start"
 common/views/components/media-banner.vue:
   sensitive: "NSFW"
   click-to-show: "Click to show"
@@ -714,6 +731,7 @@ common/views/components/poll.vue:
   remaining-hours: "{h} hours, and {m} minutes remain"
   remaining-minutes: "{m} minutes, and {s} seconds remaining"
   remaining-seconds: "{s} seconds remaining"
+  vote-confirm: "Do you want to vote?"
 common/views/components/poll-editor.vue:
   no-only-one-choice: "At least two choices are required"
   choice-n: "Choice {}"
@@ -998,6 +1016,11 @@ common/views/widgets/tips.vue:
   tips-line23: "Ai-chan kawaii!"
   tips-line24: "Misskey has been running since 2014."
   tips-line25: "In a browser compatible with notification features, you can receive notifications in case Misskey is not open"
+common/views/widgets/sunmoon.vue:
+  ctStart: " Civil twilight"
+  sunrise: "Sunrise"
+  sunset: "Sunset"
+  ctEnd: " Civil twilight"
 common/views/pages/not-found.vue:
   page-not-found: "The page has not been found"
 common/views/pages/follow.vue:
@@ -1127,6 +1150,7 @@ desktop/views/components/note-detail.vue:
   private: "Post is private"
   deleted: "Post has been removed"
   location: "Location"
+  reply: "Reply"
   renote: "Renote"
   add-reaction: "Add a reaction"
   undo-reaction: "Reverse reaction"
@@ -1808,7 +1832,7 @@ common/views/components/follow-button.vue:
   follow-processing: "Processing"
   follow-request: "Follow request"
   remoteFollow: "Remote follow"
-  remoteFollowMessage: "Enter the following account in the search box of the instance you want to follow and follow.\n```\n{acct}\n```\n\n\nAlternatively, enter the account you want to follow below."
+  remoteFollowMessage: "Enter the following URL in the search box of the instance you want to follow and follow.\n{acct}"
 mobile/views/components/note.vue:
   private: "This post is private"
   deleted: "This post has been deleted"

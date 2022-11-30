@@ -20,9 +20,9 @@ export async function proxyMedia(ctx: Router.RouterContext) {
 
 		let image: IImage;
 
-		if ('static' in ctx.query && ['image/png', 'image/apng', 'image/gif', 'image/webp', 'image/svg+xml'].includes(mime)) {
+		if ('static' in ctx.query && ['image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml'].includes(mime)) {
 			image = await convertToPng(path, 530, 255);
-		} else if ('preview' in ctx.query && ['image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/svg+xml'].includes(mime)) {
+		} else if ('preview' in ctx.query && ['image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml'].includes(mime)) {
 			image = await convertToJpeg(path, 200, 200);
 		}	else if (['image/svg+xml'].includes(mime)) {
 			image = await convertToPng(path, 2048, 2048);
@@ -30,7 +30,7 @@ export async function proxyMedia(ctx: Router.RouterContext) {
 			throw new StatusError('Rejected type', 403, 'Rejected type');
 		} else {
 			image = {
-				data: fs.readFileSync(path),
+				data: await fs.promises.readFile(path),
 				ext: ext || '',
 				type: mime,
 			};

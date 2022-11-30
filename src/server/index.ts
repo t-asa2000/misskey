@@ -2,10 +2,7 @@
  * Core Server
  */
 
-import * as fs from 'fs';
 import * as http from 'http';
-import * as http2 from 'http2';
-import * as https from 'https';
 import * as cluster from 'cluster';
 import * as Koa from 'koa';
 import * as Router from '@koa/router';
@@ -34,6 +31,7 @@ export const serverLogger = new Logger('server', 'gray', false);
 // Init app
 const app = new Koa();
 app.proxy = true;
+(app as any).maxIpsCount = 1;
 
 if (!['production', 'test'].includes(process.env.NODE_ENV || 'development')) {
 	// Logger
@@ -78,7 +76,7 @@ router.use(wellKnown.routes());
 
 router.get('/avatar/@:acct', async ctx => {
 	const { username, host } = parse(ctx.params.acct);
-	const user = await resolveUser(username, host);
+	const user = await resolveUser(username, host).catch(() => null);
 	const url = user?.avatarId ? getDriveFileUrl(await DriveFile.findOne({ _id: user.avatarId }), true) : null;
 
 	if (url) {
@@ -114,16 +112,7 @@ app.use(router.routes());
 app.use(mount(require('./web')));
 
 function createServer() {
-	if (config.https) {
-		const certs: any = {};
-		for (const k of Object.keys(config.https)) {
-			certs[k] = fs.readFileSync(config.https[k]);
-		}
-		certs['allowHTTP1'] = true;
-		return http2.createSecureServer(certs, app.callback()) as https.Server;
-	} else {
-		return http.createServer(app.callback());
-	}
+	return http.createServer(app.callback());
 }
 
 // For testing
@@ -139,7 +128,7 @@ export const startServer = () => {
 	return server;
 };
 
-export default () => new Promise(resolve => {
+export default () => new Promise<void>(resolve => {
 	const server = createServer();
 
 	// Init stream server
@@ -167,7 +156,10 @@ export default () => new Promise(resolve => {
 	});
 
 	// Listen
-	server.listen(config.port, config.addr || undefined, resolve);
+	server.listen({
+		port: config.port,
+		host: config.addr || undefined
+	}, resolve);
 
 	//#region Network stats
 	let queue: any[] = [];

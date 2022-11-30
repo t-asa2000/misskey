@@ -28,14 +28,18 @@ Note.createIndex('visibleUserIds');
 Note.createIndex('replyId');
 Note.createIndex('renoteId');
 Note.createIndex('tagsLower');
-Note.createIndex('_user.host');
 Note.createIndex('_files._id');
 Note.createIndex('_files.contentType');
 Note.createIndex({ createdAt: -1 });
 Note.createIndex({ score: -1 }, { sparse: true });
+
+Note.createIndex({ '_user.host': 1, _id: -1 });
 Note.createIndex({ '_user.host': 1, replyId: 1, _id: -1 });
+Note.dropIndex('_user.host').catch(() => {});
+
 Note.createIndex('mecabWords');
 Note.createIndex('trendWords');
+
 Note.createIndex({ 'userId': 1, _id: -1 });
 Note.dropIndex('userId').catch(() => {});
 
@@ -50,6 +54,7 @@ export type INote = {
 	createdAt: Date;
 	deletedAt?: Date;
 	updatedAt?: Date;
+	expiresAt?: Date;
 	fileIds: mongo.ObjectID[];
 	replyId: mongo.ObjectID;
 	renoteId: mongo.ObjectID;
@@ -384,6 +389,7 @@ export const pack = async (
 		createdAt: toISODateOrNull(db.createdAt),
 		deletedAt: toISODateOrNull(db.deletedAt),
 		updatedAt: toISODateOrNull(db.updatedAt),
+		expiresAt: toISODateOrNull(db.expiresAt),
 		text: db.text,
 		cw: db.cw,
 		userId: toOidString(db.userId),

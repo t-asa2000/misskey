@@ -1,11 +1,10 @@
-import * as fs from 'fs';
 import * as tmp from 'tmp';
 import { IImage, convertToJpeg } from './image-processor';
 import * as FFmpeg from 'fluent-ffmpeg';
 
 export async function generateVideoThumbnail(path: string): Promise<IImage> {
 	const [outDir, cleanup] = await new Promise<[string, any]>((res, rej) => {
-		tmp.dir((e, path, cleanup) => {
+		tmp.dir({ unsafeCleanup: true }, (e, path, cleanup) => {
 			if (e) return rej(e);
 			res([path, cleanup]);
 		});
@@ -14,7 +13,8 @@ export async function generateVideoThumbnail(path: string): Promise<IImage> {
 	try {
 		await new Promise((res, rej) => {
 			FFmpeg({
-				source: path
+				source: path,
+				timeout: 30,
 			})
 			.on('end', res)
 			.on('error', rej)
@@ -30,8 +30,6 @@ export async function generateVideoThumbnail(path: string): Promise<IImage> {
 
 		const thumbnail = await convertToJpeg(outPath, 530, 255);
 
-		// cleanup
-		await fs.promises.unlink(outPath);
 		return thumbnail;
 	} finally {
 		cleanup();

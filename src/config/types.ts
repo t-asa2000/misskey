@@ -7,8 +7,8 @@ export type Source = {
 	url: string;
 	port: number;
 	addr?: string;
-	https?: { [x: string]: string };
 	disableHsts?: boolean;
+	disableApiCors?: boolean;
 	mongodb: {
 		host: string;
 		port: number;
@@ -19,6 +19,7 @@ export type Source = {
 	redis: {
 		host: string;
 		port: number;
+		family?: number;
 		pass: string;
 		db?: number;
 		prefix?: string;

@@ -18,7 +18,7 @@
 				<p>{{ $t('following') }}</p><span>{{ u.followingCount }}</span>
 			</div>
 			<div>
-				<p>{{ $t('followers') }}</p><span>{{ u.followersCount }}</span>
+				<p>{{ $t('followers') }}</p><span>-</span>
 			</div>
 		</div>
 		<mk-follow-button class="koudoku-button" v-if="$store.getters.isSignedIn && u.id != $store.state.i.id" :user="u" mini/>

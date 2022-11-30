@@ -26,7 +26,6 @@
 					<span class="is-verified" v-if="user.isVerified" :title="$t('@.verified-user')"><fa icon="star"/></span>
 					<span class="is-bot" v-if="user.isBot" :title="$t('@.bot-user')"><fa icon="robot"/></span>
 					<span class="is-cat" v-if="user.isCat" :title="$t('@.cat-user')"><fa :icon="faPaw"/></span>
-					<span class="followed" v-if="user.isFollowed">{{ $t('follows-you') }}</span>
 				</div>
 				<div class="description">
 					<mfm v-if="user.description" :text="user.description" :is-note="false" :author="user" :i="$store.state.i" :custom-emojis="user.emojis" :key="user.id"/>
@@ -60,7 +59,7 @@
 						<i>{{ $t('following') }}</i>
 					</router-link>
 					<router-link :to="user | userPage('followers')">
-						<b>{{ user.followersCount | number }}</b>
+						<b>-</b>
 						<i>{{ $t('followers') }}</i>
 					</router-link>
 				</div>

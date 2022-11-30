@@ -29,7 +29,6 @@
 					<span class="is-cat" v-if="user.isCat" :title="$t('@.cat-user')"><fa :icon="faPaw"/></span>
 				</span>
 				<span class="moved" v-if="user.movedToUser != null">Moved to <router-link :to="user.movedToUser | userPage()"><mk-acct :user="user.movedToUser" :detail="true"/></router-link></span>
-				<span class="followed" v-if="user.isFollowed">{{ $t('follows-you') }}</span>
 			</div>
 		</header>
 		<div class="info">
@@ -72,7 +71,7 @@
 				</div>
 				<div>
 					<router-link :to="user | userPage('followers')">
-						<b>{{ user.followersCount | number }}</b>
+						<b>-</b>
 						<span>{{ $t('followers') }}</span>
 					</router-link>
 				</div>

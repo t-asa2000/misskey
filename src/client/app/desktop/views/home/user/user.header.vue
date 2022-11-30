@@ -16,7 +16,6 @@
 				<span class="is-cat" v-if="user.isCat" :title="$t('@.cat-user')"><fa :icon="faPaw"/></span>
 			</div>
 		</div>
-		<span class="followed" v-if="$store.getters.isSignedIn && $store.state.i.id != user.id && user.isFollowed">{{ $t('follows-you') }}</span>
 		<div class="actions" v-if="$store.getters.isSignedIn">
 			<button @click="menu" class="menu" ref="menu"><fa icon="ellipsis-h"/></button>
 			<button @click="listMenu" class="listMenu" ref="listMenu"><fa :icon="['fas', 'list']"/></button>
@@ -51,7 +50,7 @@
 			<a v-if="isPostsPage" class="notes-count" @click="scrollToTL()"><b>{{ user.notesCount | number }}</b>{{ $t('posts') }}</a>
 			<router-link v-else :to="user | userPage()" class="notes-count"><b>{{ user.notesCount | number }}</b>{{ $t('posts') }}</router-link>
 			<router-link :to="user | userPage('following')" class="following clickable"><b>{{ user.followingCount | number }}</b>{{ $t('following') }}</router-link>
-			<router-link :to="user | userPage('followers')" class="followers clickable"><b>{{ user.followersCount | number }}</b>{{ $t('followers') }}</router-link>
+			<router-link :to="user | userPage('followers')" class="followers clickable"><b>-</b>{{ $t('followers') }}</router-link>
 		</div>
 		<div class="usertags">
 			<a class="usertag" v-for="usertag in user.usertags" :key="usertag" @click="removeUsertag(usertag)"><fa :icon="faUserTag"/>{{ usertag }}</a>

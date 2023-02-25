@@ -15,14 +15,15 @@ import instanceChart from '../../services/chart/instance';
 import fetchMeta from '../../misc/fetch-meta';
 import { generateVideoThumbnail } from './generate-video-thumbnail';
 import { driveLogger } from './logger';
-import { IImage, convertSharpToJpeg, convertSharpToWebp, convertSharpToPng, convertSharpToPngOrJpeg, convertSharpToAvif } from './image-processor';
+import { IImage, convertSharpToJpeg, convertSharpToWebp, convertSharpToPng, convertSharpToAvif } from './image-processor';
 import Instance from '../../models/instance';
 import { contentDisposition } from '../../misc/content-disposition';
 import { getFileInfo, FileInfo, FILE_TYPE_BROWSERSAFE } from '../../misc/get-file-info';
 import { DriveConfig } from '../../config/types';
 import { getDriveConfig } from '../../misc/get-drive-config';
-import * as S3 from 'aws-sdk/clients/s3';
-import { getS3 } from './s3';
+import { getS3Client } from './s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { PutObjectCommandInput, CompleteMultipartUploadCommandOutput } from '@aws-sdk/client-s3';
 import * as sharp from 'sharp';
 import { v4 as uuid } from 'uuid';
 import { InternalStorage } from './internal-storage';
@@ -232,19 +233,11 @@ export async function generateAlts(path: string, type: string, generateWeb: bool
 	const webpulicSafe = !metadata.exif && !metadata.iptc && !metadata.xmp && !metadata.tifftagPhotoshop	// has meta
 		&& metadata.width && metadata.width <= 2048 && metadata.height && metadata.height <= 2048;	// or over 2048
 
-	const subsamplingOff = metadata.format === 'jpeg' && metadata.chromaSubsampling === '4:4:4';
-
 	if (generateWeb) {
 		logger.debug(`creating web image`);
 
 		if (['image/jpeg'].includes(type) && !webpulicSafe) { 
-			if (subsamplingOff) {
-				// (Photoshopの書き出しのデフォルトのように) Chroma subsampling を行っていない場合は、意図を汲んで行わないようにする。
-				webpublic = await convertSharpToJpeg(img, 2048, 2048, { disableSubsampling: true });
-			} else {
-				// それ以外は、MozJPEGルーチンを使用する (このあたりのサイズだとWebPより強い)
-				webpublic = await convertSharpToJpeg(img, 2048, 2048, { useMozjpeg: true });
-			}
+			webpublic = await convertSharpToJpeg(img, 2048, 2048, { useMozjpeg: true });
 		} else if (['image/webp'].includes(type) && !webpulicSafe) {
 			webpublic = await convertSharpToWebp(img, 2048, 2048);
 		} else if (['image/avif'].includes(type) && !webpulicSafe) {
@@ -265,12 +258,9 @@ export async function generateAlts(path: string, type: string, generateWeb: bool
 	let thumbnail: IImage | null = null;
 
 	if (['image/jpeg', 'image/webp', 'image/avif'].includes(type)) {
-		// このあたりのサイズだとWebPの方が強いが互換性のためにとりあえず保留
-		thumbnail = await convertSharpToJpeg(img, 530, 255);
+		thumbnail = await convertSharpToWebp(img, 530, 255);
 	} else if (['image/png', 'image/svg+xml'].includes(type)) {
-		// このあたりのサイズだとWebPの方が強いが互換性のためにとりあえず保留
-		// こっちの方は smartSubsample 使うといいかも
-		thumbnail = await convertSharpToPngOrJpeg(img, 530, 255);
+		thumbnail = await convertSharpToWebp(img, 530, 255, { smartSubsample: true });
 	}
 	// #endregion thumbnail
 
@@ -292,19 +282,21 @@ async function upload(key: string, stream: fs.ReadStream | Buffer, type: string,
 		Body: stream,
 		ContentType: type,
 		CacheControl: 'max-age=2592000, s-maxage=172800, immutable',
-	} as S3.PutObjectRequest;
+	} as PutObjectCommandInput;
 
 	if (filename) params.ContentDisposition = contentDisposition('inline', filename);
 	if (drive.config?.setPublicRead) params.ACL = 'public-read';
 
-	const s3 = getS3(drive);
+	const s3Client = getS3Client(drive);
 
-	const upload = s3.upload(params, {
-		partSize: s3.endpoint?.hostname === 'storage.googleapis.com' ? 500 * 1024 * 1024 : 8 * 1024 * 1024
+	const upload = new Upload({
+		client: s3Client,
+		params,
+		partSize: drive.config?.endPoint === 'storage.googleapis.com' ? 500 * 1024 * 1024 : 8 * 1024 * 1024
 	});
 
-	const result = await upload.promise();
-	if (result) logger.debug(`Uploaded: ${result.Bucket}/${result.Key} => ${result.Location}`);
+	const result = await upload.done() as CompleteMultipartUploadCommandOutput;	// TODO: About...が返ることがあるのか、abortはどう判定するのか謎
+	logger.debug(`Uploaded: ${result.Bucket}/${result.Key} => ${result.Location}`);
 }
 
 /**

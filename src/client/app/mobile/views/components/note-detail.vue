@@ -46,6 +46,9 @@
 				<div class="renote" v-if="appearNote.renote">
 					<mk-note-preview :note="appearNote.renote"/>
 				</div>
+				<div class="reference" v-for="reference in appearNote.references" :key="reference">
+					<mk-note-preview :note="reference"/>
+				</div>
 			</div>
 		</div>
 		<router-link class="time" :to="appearNote | notePage">
@@ -63,15 +66,20 @@
 				<fa icon="reply"/>
 				<p class="count" v-if="appearNote.repliesCount + appearNote.quoteCount > 0">{{ appearNote.repliesCount + appearNote.quoteCount }}</p>
 			</button>
+
+			<!-- Renote -->
 			<button v-if="appearNote.myRenoteId != null" @click="undoRenote()" title="Undo" class="renoted">
 				<fa icon="retweet"/><p class="count" v-if="appearNote.renoteCount - appearNote.quoteCount > 0">{{ appearNote.renoteCount - appearNote.quoteCount }}</p>
 			</button>
-			<button v-else-if="['public', 'home'].includes(appearNote.visibility)" @click="renote()" title="Renote">
+			<button v-else-if="['public', 'home'].includes(appearNote.visibility)" @click="directRenote()" title="Renote">
 				<fa icon="retweet"/><p class="count" v-if="appearNote.renoteCount - appearNote.quoteCount > 0">{{ appearNote.renoteCount - appearNote.quoteCount }}</p>
 			</button>
-			<button v-else>
-				<fa icon="ban"/>
+
+			<!-- Quote -->
+			<button v-if="['public', 'home'].includes(appearNote.visibility)" @click="renote()" title="Quote">
+				<fa icon="quote-right"/><p class="count" v-if="appearNote.quoteCount > 0">{{ appearNote.quoteCount }}</p>
 			</button>
+
 			<button v-if="appearNote.myReaction == null" class="reactionButton" @click="react()" ref="reactButton">
 				<fa-layers>
 					<fa :icon="faLaugh"/>
@@ -289,7 +297,8 @@ export default Vue.extend({
 						font-size 24px
 
 				> .renote
-					margin 0.3em 0.6em
+				> .reference
+					margin 1em 0.6em
 					opacity 0.9
 
 					> *

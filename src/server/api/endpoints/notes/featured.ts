@@ -3,8 +3,7 @@ import Note from '../../../../models/note';
 import { packMany } from '../../../../models/note';
 import define from '../../define';
 import { getHideUserIds } from '../../common/get-hide-users';
-import { genMeid7 } from '../../../../misc/id/meid7';
-import * as mongo from 'mongodb';
+import fetchMeta from '../../../../misc/fetch-meta';
 
 export const meta = {
 	desc: {
@@ -17,14 +16,13 @@ export const meta = {
 	requireCredential: false,
 
 	allowGet: true,
-	cacheSec: 300,
 
 	params: {
-		days: {
-			validator: $.optional.num.range(0, 33),
-			default: 2,
+		minScore: {
+			validator: $.optional.num.range(0, 100),
+			default: 5,
 			desc: {
-				'ja-JP': '集計期間 (日)'
+				'ja-JP': '最低スコア'
 			}
 		},
 		limit: {
@@ -32,6 +30,13 @@ export const meta = {
 			default: 10,
 			desc: {
 				'ja-JP': '最大数'
+			}
+		},
+		offset: {
+			validator: $.optional.num.min(0),
+			default: 0,
+			desc: {
+				'ja-JP': 'オフセット'
 			}
 		},
 		fileType: {
@@ -75,21 +80,19 @@ export const meta = {
 // クライアントではこれを日付順にソートしている
 
 export default define(meta, async (ps, user) => {
-	if (ps.excludeNsfw && ps.excludeSfw) return [];
+	const m = await fetchMeta();
+	if (!user && m.disableTimelinePreview) {
+		return [];
+	}
 
-	const day = 1000 * 60 * 60 * 24 * ps.days;
+	if (ps.excludeNsfw && ps.excludeSfw) return [];
 
 	const hideUserIds = await getHideUserIds(user);
 
-	const id = genMeid7(new Date(Date.now() - day));
-
 	const query = {
-		_id: {
-			$gt: new mongo.ObjectID(id)
-		},
 		deletedAt: null,
 		visibility: 'public',
-		score: { $gt: 1 },
+		score: { $gte: ps.minScore },
 		localOnly: { $ne: true },
 		...(hideUserIds && hideUserIds.length > 0 ? { userId: { $nin: hideUserIds } } : {})
 	} as any;
@@ -118,10 +121,10 @@ export default define(meta, async (ps, user) => {
 	}
 
 	const notes = await Note.find(query, {
+		maxTimeMS: 20000,
 		limit: ps.limit,
-		sort: {
-			score: -1
-		}
+		skip: ps.offset,
+		sort: { _id: -1 }
 	});
 
 	return await packMany(notes, user);

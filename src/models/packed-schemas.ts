@@ -44,6 +44,7 @@ export type ThinPackedNote = {
 export type PackedNote = ThinPackedNote & {
 	reply?: ThinPackedNote | null;
 	renote?: PackedNote | null;
+	references?: PackedNote[];
 	poll?: any | null;	// TODO
 	myReaction?: string | null;
 	myRenoteId?: string | null;
@@ -198,15 +199,51 @@ export type V10Followers = {
 }
 //#endregion
 
-export type PackedNotification = {
+export type PackedNotification = PackedBasicNotification | PackedNoteNotification | PackedMessageNotification | PackedReactionNotification | PackedVoteNotification;
+
+type PackedNotificationBase = {
 	id: string;
 	createdAt: string;
 	isRead: boolean;
-	type: 'follow' | 'mention' | 'reply' | 'renote' | 'quote' | 'reaction' | 'poll_vote' | 'poll_finished' | 'receiveFollowRequest' | 'highlight' | 'unreadMessagingMessage';
 	user: ThinPackedUser;
 	userId: string;
-	note?: PackedNote | null;
-	message?: any | null;
-	reaction?: string | null;
-	choice?: number | null;
+};
+
+type PackedBasicNotification = PackedNotificationBase & {
+	type: 'follow' | 'receiveFollowRequest';
+};
+
+type PackedNoteNotification = PackedNotificationBase & {
+	type: 'mention' | 'reply' | 'renote' | 'quote' | 'highlight' | 'poll_finished';
+	/** Note (mention/reply/renote/quoteの場合は相手のNote) */
+	note: PackedNote | null;
+};
+
+type PackedMessageNotification = PackedNotificationBase & {
+	type: 'unreadMessagingMessage';
+	message: any | null;
+};
+
+type PackedReactionNotification = PackedNotificationBase & {
+	type: 'reaction';
+	note: PackedNote | null;
+	reaction: string | null;
+};
+
+type PackedVoteNotification = PackedNotificationBase & {
+	type: 'poll_vote';
+	note: PackedNote | null;
+	choice: number | null;
+};
+
+export type packedInvitation = {
+	id: string;
+	inviterId?: string;
+	inviteeIds?: string[];
+	createdAt: string;
+	expiredAt?: string;
+	code: string;
+	inviter?: ThinPackedUser | null;
+	invitees?: (ThinPackedUser | null)[];
+	restCount?: number;
 };

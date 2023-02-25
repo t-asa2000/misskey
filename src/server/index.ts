@@ -30,8 +30,10 @@ export const serverLogger = new Logger('server', 'gray', false);
 
 // Init app
 const app = new Koa();
+
 app.proxy = true;
 (app as any).maxIpsCount = 1;
+(app as any).proxyIpHeader = config.proxyIpHeader ?? 'X-Forwarded-For';
 
 if (!['production', 'test'].includes(process.env.NODE_ENV || 'development')) {
 	// Logger
@@ -56,9 +58,11 @@ if (config.url.startsWith('https') && !config.disableHsts) {
 	});
 }
 
+// Default Security Headers (各ルートで上書き可)
 app.use(async (ctx, next) => {
-	ctx.set('Permissions-Policy', 'interest-cohort=()');
 	ctx.set('X-Content-Type-Options', 'nosniff');
+	ctx.set('X-Frame-Options', 'DENY');
+	ctx.set('Content-Security-Policy', `default-src 'none'`);
 	await next();
 });
 

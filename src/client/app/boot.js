@@ -46,6 +46,8 @@
 	// Script version
 	const ver = localStorage.getItem('v') || VERSION;
 
+	const env = ENV;
+
 	//#region Detect the user language
 	let lang = null;
 
@@ -119,7 +121,6 @@
 	//       'defer' make it possible to run the script when the dom loaded.
 	const script = document.createElement('script');
 	script.setAttribute('src', `/assets/${app}.${ver}.js`);
-	script.setAttribute('async', 'true');
 	script.setAttribute('defer', 'true');
 	head.appendChild(script);
 
@@ -149,7 +150,7 @@
 
 			refresh();
 		}
-	}, 3000);
+	}, ENV === 'production' ? 3000 : 1000);
 
 	function refresh() {
 		localStorage.setItem('shouldFlush', 'false');

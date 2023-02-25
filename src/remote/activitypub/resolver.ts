@@ -10,9 +10,11 @@ import { isBlockedHost } from '../../services/instance-moderation';
 export default class Resolver {
 	private history: Set<string>;
 	private user?: ILocalUser;
+	private recursionLimit?: number;
 
-	constructor() {
+	constructor(recursionLimit = 200) {
 		this.history = new Set();
+		this.recursionLimit = recursionLimit;
 	}
 
 	public getHistory(): string[] {
@@ -44,6 +46,10 @@ export default class Resolver {
 			throw new Error('cannot resolve already resolved one');
 		}
 
+		if (this.recursionLimit && this.history.size > this.recursionLimit) {
+			throw new Error('hit recursion limit');
+		}
+
 		this.history.add(value);
 
 		if (!value.match(/^https?:/)) {
@@ -56,7 +62,7 @@ export default class Resolver {
 			throw new StatusError('Blocked instance', 451, 'Blocked instance');
 		}
 
-		if (config.signToActivityPubGet && !this.user) {
+		if (config.signToActivityPubGet !== false && !this.user) {
 			this.user = await getInstanceActor();
 		}
 

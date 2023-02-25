@@ -4,7 +4,7 @@ import config from '../../../config';
 import Resolver from '../resolver';
 import { INote } from '../../../models/note';
 import post from '../../../services/note/create';
-import { IPost, IObject, getOneApId, getApId, getOneApHrefNullable, isPost, isEmoji, IApImage, getApType } from '../type';
+import { IPost, IObject, getOneApId, getApId, getOneApHrefNullable, isPost, isEmoji, IApImage, getApType, IOrderedCollection, ICollection, isCollectionOrOrderedCollection, isCollection, isCollectionPage, ICollectionPage } from '../type';
 import { resolvePerson, updatePerson } from './person';
 import { resolveImage } from './image';
 import { IRemoteUser } from '../../../models/user';
@@ -21,10 +21,8 @@ import { IDriveFile } from '../../../models/drive-file';
 import { deliverQuestionUpdate } from '../../../services/note/polls/update';
 import { extractApHost } from '../../../misc/convert-host';
 import { getApLock } from '../../../misc/app-lock';
-import { createMessage } from '../../../services/messages/create';
 import { isBlockedHost } from '../../../services/instance-moderation';
 import { parseAudience } from '../audience';
-import MessagingMessage from '../../../models/messaging-message';
 import DbResolver from '../db-resolver';
 import { tryStockEmoji } from '../../../services/emoji-store';
 import { parseDate, parseDateWithLimit } from '../misc/date';
@@ -101,7 +99,7 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 		return null;
 	}
 
-	const noteAudience = await parseAudience(actor, note.to, note.cc);
+	const noteAudience = await parseAudience(actor, note.to, note.cc, resolver);
 	let visibility = noteAudience.visibility;
 	const visibleUsers = noteAudience.visibleUsers;
 
@@ -113,10 +111,8 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 		}
 	}
 
-	const apMentions = await extractApMentions(note.tag);
+	const apMentions = await extractApMentions(note.tag, resolver);
 	const apHashtags = await extractApHashtags(note.tag);
-
-	let isTalk = note._misskey_talk && visibility === 'specified';
 
 	// 添付ファイル
 	// Noteがsensitiveなら添付もsensitiveにする
@@ -144,17 +140,6 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 				return x;
 			}
 		}).catch(async e => {
-			// チャットだったらinReplyToのエラーは無視
-			const uri = getApId(getOneApId(note.inReplyTo!));
-			if (uri.startsWith(config.url + '/')) {
-				const id = uri.split('/').pop();
-				const talk = await MessagingMessage.findOne({ _id: id });
-				if (talk) {
-					isTalk = true;
-					return null;
-				}
-			}
-
 			logger.warn(`Error in inReplyTo reply:${note.inReplyTo} - ${e.statusCode || e}`);
 			replyError = true;
 			return null;
@@ -201,6 +186,14 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 		}
 	}
 
+	// 参照
+	let references: INote[] = [];
+	if (note.references) {
+		references = await fetchReferences(note.references, resolver).catch(e => {
+			return [];
+		});
+	}
+
 	const cw = note.summary === '' ? null : note.summary;
 
 	// テキストのパース
@@ -236,14 +229,8 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 	const poll = await extractPollFromQuestion(note, resolver).catch(() => undefined);
 
 	// ユーザーの情報が古かったらついでに更新しておく
-	if (actor.lastFetchedAt == null || Date.now() - actor.lastFetchedAt.getTime() > 1000 * 60 * 60 * 24) {
+	if (actor.lastFetchedAt == null || Date.now() - actor.lastFetchedAt.getTime() > 1000 * 60 * 60 * 6) {
 		updatePerson(actor.uri);
-	}
-
-	if (isTalk) {
-		for (const recipient of visibleUsers) {
-			return await createMessage(actor, recipient, text, (files && files.length > 0) ? files[0] : undefined, object.id);
-		}
 	}
 
 	return await post(actor, {
@@ -265,6 +252,7 @@ export async function createNote(value: string | IObject, resolver?: Resolver | 
 		poll,
 		uri: note.id,
 		url: getOneApHrefNullable(note.url),
+		references,
 	}, silent);
 }
 
@@ -360,4 +348,50 @@ export async function extractEmojis(tags: IObject | IObject[], host_: string) {
 			return emoji;
 		})
 	);
+}
+
+export async function fetchReferences(src: string | IOrderedCollection | ICollection , resolver: Resolver) {
+	// get root
+	const root = await resolver.resolve(src);
+
+	// get firstPage
+	let page: ICollectionPage | undefined;
+	if (isCollection(root) && root.first) {
+		const t = await resolver.resolve(root.first);
+		if (isCollectionPage(t)) {
+			page = t;
+		} else {
+			throw 'cant find firstPage';
+		}
+	}
+
+	const references: INote[] = [];
+
+	// Page再帰
+	for (let i = 0; i < 100; i++) {
+		if (!page?.items) throw 'page not have items';
+
+		for (const item of page.items) {
+			const post = await resolveNote(getApId(item)).catch(() => null);	// 他鯖のオブジェクトが本物かわからないのでstring => uri => resolve
+			if (post) {
+				references.push(post);
+				if (references.length > 100) throw 'too many references';
+			} else {
+				// not post
+			}
+		}
+
+		if (page.next) {
+			const t = await resolver.resolve(page.next);
+			if (isCollectionPage(t)) {
+				page = t;
+			} else {
+				throw 'cant find next';
+			}
+		} else {
+			return references;
+		}
+	}
+
+	return [];
 }

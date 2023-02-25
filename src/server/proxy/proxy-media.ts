@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as Router from '@koa/router';
 import { serverLogger } from '..';
-import { IImage, convertToPng, convertToJpeg } from '../../services/drive/image-processor';
+import { IImage, convertToWebp } from '../../services/drive/image-processor';
 import { createTemp } from '../../misc/create-temp';
 import { downloadUrl } from '../../misc/download-url';
 import { detectTypeWithCheck, FILE_TYPE_BROWSERSAFE } from '../../misc/get-file-info';
@@ -9,6 +9,12 @@ import { StatusError } from '../../misc/fetch';
 
 export async function proxyMedia(ctx: Router.RouterContext) {
 	const url = 'url' in ctx.query ? ctx.query.url : 'https://' + ctx.params.url;
+
+	if (typeof url !== 'string') {
+		ctx.status = 400;
+		ctx.set('Cache-Control', 'max-age=86400');
+		return;
+	}
 
 	// Create temp file
 	const [path, cleanup] = await createTemp();
@@ -21,11 +27,11 @@ export async function proxyMedia(ctx: Router.RouterContext) {
 		let image: IImage;
 
 		if ('static' in ctx.query && ['image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml'].includes(mime)) {
-			image = await convertToPng(path, 530, 255);
-		} else if ('preview' in ctx.query && ['image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml'].includes(mime)) {
-			image = await convertToJpeg(path, 200, 200);
+			image = await convertToWebp(path, 530, 255);
+		} else if ('preview' in ctx.query && ['image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif', 'image/svg+xml'].includes(mime)) {	// TODO: 廃止する
+			image = await convertToWebp(path, 200, 200);
 		}	else if (['image/svg+xml'].includes(mime)) {
-			image = await convertToPng(path, 2048, 2048);
+			image = await convertToWebp(path, 2048, 2048);
 		} else if (!mime.startsWith('image/') || !FILE_TYPE_BROWSERSAFE.includes(mime)) {
 			throw new StatusError('Rejected type', 403, 'Rejected type');
 		} else {
@@ -39,7 +45,7 @@ export async function proxyMedia(ctx: Router.RouterContext) {
 		ctx.body = image.data;
 		ctx.set('Content-Type', image.type);
 		ctx.set('Cache-Control', 'max-age=604800, immutable');
-	} catch (e) {
+	} catch (e: any) {
 		serverLogger.error(e);
 
 		if (e instanceof StatusError && e.isClientError) {

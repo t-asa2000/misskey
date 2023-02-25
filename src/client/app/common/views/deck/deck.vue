@@ -55,7 +55,7 @@ import Vue from 'vue';
 import i18n from '../../../i18n';
 import XColumnCore from './deck.column-core.vue';
 import Menu from '../../../common/views/components/menu.vue';
-import { faThumbsUp } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 import { v4 as uuid } from 'uuid';
 
@@ -243,6 +243,15 @@ export default Vue.extend({
 						});
 					}
 				}, {
+					icon: faQuestion,
+					text: this.$t('@deck.another'),
+					action: () => {
+						this.$store.commit('device/addDeckColumn', {
+							id: uuid(),
+							type: 'another'
+						});
+					}
+				}, {
 					icon: 'at',
 					text: this.$t('@deck.mentions'),
 					action: () => {
@@ -285,17 +294,24 @@ export default Vue.extend({
 				}, {
 					icon: 'hashtag',
 					text: this.$t('@deck.hashtag'),
-					action: () => {
-						this.$root.dialog({
-							title: this.$t('enter-hashtag-tl-title'),
-							input: true
-						}).then(({ canceled, result: title }) => {
-							if (canceled) return;
-							this.$store.commit('device/addDeckColumn', {
-								id: uuid(),
-								type: 'hashtag',
-								tagTlId: this.$store.state.settings.tagTimelines.find(x => x.title == title).id
-							});
+					action: async () => {
+						const tagTls = this.$store.state.settings.tagTimelines;
+						const { canceled, result: tagTlId } = await this.$root.dialog({
+							type: null,
+							title: this.$t('@deck.select-tagTl.title'),
+							text: this.$t('@deck.select-tagTl.text'),
+							select: {
+								items: tagTls.map((tagTl: any) => ({
+									value: tagTl.id, text: tagTl.title
+								}))
+							},
+							showCancelButton: true
+						});
+						if (canceled) return;
+						this.$store.commit('device/addDeckColumn', {
+							id: uuid(),
+							type: 'hashtag',
+							tagTlId: tagTlId
 						});
 					}
 				}, {
@@ -383,7 +399,7 @@ export default Vue.extend({
 
 		isTlColumn(id) {
 			const column = this.columns.find(c => c.id === id);
-			return ['home', 'local', 'locao', 'hybrid', 'hot', 'global', 'list', 'hashtag', 'mentions', 'direct'].includes(column.type);
+			return ['home', 'local', 'locao', 'hybrid', 'hot', 'global', 'another', 'list', 'hashtag', 'mentions', 'direct'].includes(column.type);
 		}
 	}
 });

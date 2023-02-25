@@ -124,9 +124,9 @@ export async function createPerson(uri: string, resolver?: Resolver): Promise<IR
 
 	logger.info(`Creating the Person: ${person.id}`);
 
-	const [followersCount = -1, followingCount = -1, notesCount = 0] = await Promise.all([
-		-1,
-		-1,
+	const [followersCount = 0, followingCount = 0, notesCount = 0] = await Promise.all([
+		getCollectionCount(person.followers, resolver).catch(() => undefined),
+		getCollectionCount(person.following, resolver).catch(() => undefined),
 		getCollectionCount(person.outbox, resolver).catch(() => undefined),
 	]);
 
@@ -286,7 +286,7 @@ export async function createPerson(uri: string, resolver?: Resolver): Promise<IR
 	});
 	//#endregion
 
-	await updateFeatured(user._id).catch(err => logger.error(err));
+	await updateFeatured(user._id, resolver).catch(err => logger.error(err));
 
 	return user;
 }
@@ -322,9 +322,9 @@ export async function updatePerson(uri: string, resolver?: Resolver, hint?: IAct
 
 	logger.info(`Updating the Person: ${person.id}`);
 
-	const [followersCount = -1, followingCount = -1, notesCount = 0] = await Promise.all([
-		-1,
-		-1,
+	const [followersCount = 0, followingCount = 0, notesCount = 0] = await Promise.all([
+		getCollectionCount(person.followers, resolver).catch(() => undefined),
+		getCollectionCount(person.following, resolver).catch(() => undefined),
 		getCollectionCount(person.outbox, resolver).catch(() => undefined),
 	]);
 
@@ -421,7 +421,7 @@ export async function updatePerson(uri: string, resolver?: Resolver, hint?: IAct
 		multi: true
 	});
 
-	await updateFeatured(exist._id).catch(err => logger.error(err));
+	await updateFeatured(exist._id, resolver).catch(err => logger.error(err));
 
 	registerOrFetchInstanceDoc(extractDbHost(uri)).then(i => {
 		UpdateInstanceinfo(i);
@@ -536,14 +536,14 @@ export function analyzeAttachments(attachments: IObject | IObject[] | undefined)
 	return { fields, services };
 }
 
-export async function updateFeatured(userId: mongo.ObjectID) {
+export async function updateFeatured(userId: mongo.ObjectID, resolver?: Resolver) {
 	const user = await User.findOne({ _id: userId });
 	if (!isRemoteUser(user)) return;
 	if (!user.featured) return;
 
 	logger.info(`Updating the featured: ${user.uri}`);
 
-	const resolver = new Resolver();
+	if (resolver == null) resolver = new Resolver();
 
 	// Resolve to (Ordered)Collection Object
 	const collection = await resolver.resolveCollection(user.featured);

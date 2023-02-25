@@ -20,6 +20,7 @@ import { transform } from '../misc/cafy-id';
 import { extractMfmTypes } from '../mfm/extract-mfm-types';
 import { nyaize } from '../misc/nyaize';
 import { extractEmojis } from '../mfm/extract-emojis';
+import { sanitizeUrl } from '../misc/sanitize-url';
 
 const Note = db.get<INote>('notes');
 Note.createIndex('uri', { sparse: true, unique: true });
@@ -121,6 +122,9 @@ export type INote = {
 	 */
 	mecabWords?: string[];
 	trendWords?: string[];
+
+	// 参照IDs
+	referenceIds?: mongo.ObjectID[];
 
 	// 非正規化
 	_reply?: {
@@ -410,15 +414,13 @@ export const pack = async (
 		emojis: populateEmojis(),
 		fileIds: db.fileIds ? db.fileIds.map(toOidString) : [],
 		files: packFileMany(db.fileIds || []),
-		uri: db.uri || null,
-		url: db.url || null,
+		uri: sanitizeUrl(db.uri || null),
+		url: sanitizeUrl(db.url || null),
 		appId: toOidStringOrNull(db.appId),
 		app: db.appId ? packApp(db.appId) : null,
-
 		visibleUserIds: db.visibleUserIds?.length > 0 ? db.visibleUserIds.map(toOidString) : [],
 		mentions: db.mentions?.length > 0 ? db.mentions.map(toOidString) : [],
 		hasRemoteMentions: db.mentionedRemoteUsers?.length > 0,
-
 		...(opts.detail ? {
 			reply: (opts.detail && db.replyId) ? pack(db.replyId, meId, {
 				detail: false
@@ -426,6 +428,13 @@ export const pack = async (
 
 			renote: db.renoteId ? pack(db.renoteId, meId, {
 				detail: true
+			}) : null,
+
+			referenceIds: db.referenceIds?.reverse(),
+
+			references: db.referenceIds ? packMany(db.referenceIds.reverse(), meId, {
+				detail: false,
+				removeError: true,
 			}) : null,
 
 			poll: db.poll ? populatePoll() : null,

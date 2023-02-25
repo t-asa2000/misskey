@@ -1,28 +1,27 @@
-import * as push from 'web-push';
 import * as mongo from 'mongodb';
-import Subscription from '../models/sw-subscription';
-import config from '../config';
 import fetchMeta from '../misc/fetch-meta';
-import { IMeta } from '../models/meta';
+import getNoteSummary from '../misc/get-note-summary';
+import Subscription from '../models/sw-subscription';
 import User, { getPushNotificationsValue, isLocalUser } from '../models/user';
+import { webpushDeliver } from '../queue';
 
-let meta: IMeta = null;
+let swEnabled = false;
 
-setInterval(() => {
-	fetchMeta().then(m => {
-		meta = m;
-
-		if (meta.enableServiceWorker) {
-			// アプリケーションの連絡先と、サーバーサイドの鍵ペアの情報を登録
-			push.setVapidDetails(config.url,
-				meta.swPublicKey,
-				meta.swPrivateKey);
+function update() {
+	fetchMeta().then(meta => {
+		if (meta.enableServiceWorker && meta.swPublicKey && meta.swPrivateKey) {
+			swEnabled = true;
+		} else {
+			swEnabled = false;
 		}
 	});
-}, 30000);
+}
+
+setInterval(() => { update() }, 30000);
+update();
 
 export default async function(userId: mongo.ObjectID | string, type: string, body?: any) {
-	if (!meta.enableServiceWorker) return;
+	if (!swEnabled) return;
 
 	if (typeof userId === 'string') {
 		userId = new mongo.ObjectID(userId) as mongo.ObjectID;
@@ -39,6 +38,11 @@ export default async function(userId: mongo.ObjectID | string, type: string, bod
 		if (!enabled) return;
 	}
 
+	const payload = {
+		type,
+		body: truncateNotification(body)
+	};
+
 	// Fetch
 	const subscriptions = await Subscription.find({
 		userId: userId
@@ -53,25 +57,30 @@ export default async function(userId: mongo.ObjectID | string, type: string, bod
 			}
 		};
 
-		const payload = {
-			type, body
-		};
-
-		push.sendNotification(pushSubscription, JSON.stringify(payload), {
-			proxy: config.proxy
-		}).catch((err: any) => {
-			//swLogger.info(err.statusCode);
-			//swLogger.info(err.headers);
-			//swLogger.info(err.body);
-
-			if (err.statusCode == 410) {
-				Subscription.remove({
-					userId: userId,
-					endpoint: subscription.endpoint,
-					auth: subscription.auth,
-					publickey: subscription.publickey
-				});
-			}
+		webpushDeliver({
+			swSubscriptionId: subscription._id,
+			pushSubscription,
+			payload: JSON.stringify(payload),
 		});
 	}
+}
+
+function truncateNotification(notification: any): any {
+	if (notification.note) {
+		return {
+			...notification,
+			note: {
+				...notification.note,
+				// textをgetNoteSummaryしたものに置き換える
+				text: getNoteSummary(notification.type === 'renote' ? notification.note.renote : notification.note).substring(0, 3000),
+				_truncated: true,
+				cw: undefined,
+				reply: undefined,
+				renote: undefined,
+				user: undefined as any, // 通知を受け取ったユーザーである場合が多いのでこれも捨てる
+			}
+		};
+	}
+
+	return notification;
 }

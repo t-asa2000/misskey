@@ -1,3 +1,5 @@
+import * as tmp from 'tmp';
+import * as fs from 'fs';
 import * as Router from '@koa/router';
 import { getJson } from '../../misc/fetch';
 import summaly from '../../misc/summaly';
@@ -5,6 +7,10 @@ import fetchMeta from '../../misc/fetch-meta';
 import Logger from '../../services/logger';
 import config from '../../config';
 import { query } from '../../prelude/url';
+import { downloadUrl } from '../../misc/download-url';
+import { detectImageSize } from '../../misc/get-file-info';
+import { convertToWebp } from '../../services/drive/image-processor';
+import { sanitizeUrl } from '../../misc/sanitize-url';
 
 const logger = new Logger('url-preview');
 
@@ -28,8 +34,11 @@ module.exports = async (ctx: Router.RouterContext) => {
 
 		logger.succ(`Got preview of ${ctx.query.url}: ${summary.title}`);
 
-		summary.icon = wrap(summary.icon);
-		summary.thumbnail = wrap(summary.thumbnail);
+		summary.icon = await wrap(summary.icon, 32);
+		summary.thumbnail = await wrap(summary.thumbnail, 128);
+
+		if (summary.player) summary.player.url = sanitizeUrl(summary.player.url);
+		summary.url = sanitizeUrl(summary.url);
 
 		// Cache 7days
 		ctx.set('Cache-Control', 'max-age=604800');
@@ -45,13 +54,51 @@ module.exports = async (ctx: Router.RouterContext) => {
 	}
 };
 
-function wrap(url: string): string {
-	return url != null
-		? url.match(/^https?:\/\//)
-			? `${config.url}/proxy/preview.jpg?${query({
-				url,
-				preview: '1'
-			})}`
-			: url
-		: null;
+async function wrap(url: string | null, size = 128): Promise<string | null> {
+	if (url == null) return null;
+
+	if (url.match(/^https?:/)) {
+		return await convertDataUri(url, size);
+	}
+
+	if (url.match(/^data:/)) {
+		return url;
+	}
+
+	return null;
+}
+
+async function convertDataUri(url: string | null | undefined, size = 128): Promise<string | null> {
+	if (url == null) return null;
+
+	const [path, cleanup] = await new Promise<[string, any]>((res, rej) => {
+		tmp.file((e, path, fd, cleanup) => {
+			if (e) return rej(e);
+			res([path, cleanup]);
+		});
+	});
+
+	try {
+		await downloadUrl(url, path);
+
+		const imageSize = await detectImageSize(path);
+
+		if (!imageSize) return null;
+		if (imageSize.wUnits === 'px' && (imageSize.width > 16383 || imageSize.height > 16383)) return null;
+
+		if (['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'].includes(imageSize.mime)) {
+			const image = await convertToWebp(path, size, size);
+			return `data:image/webp;base64,${image.data.toString('base64')}`;
+		}
+
+		if (['image/x-icon'].includes(imageSize.mime)) {
+			return `data:image/x-icon;base64,${(await fs.promises.readFile(path)).toString('base64')}`;
+		}
+
+		return null;
+	} catch (e) {
+		return null;
+	} finally {
+		cleanup();
+	}
 }

@@ -139,7 +139,7 @@ export interface IPost extends IObject {
 	_misskey_quote?: string;
 	quoteUrl?: string;
 	quoteUri?: string;
-	_misskey_talk?: boolean;
+	references: string | ICollection;
 }
 
 export const validPost = ['Note', 'Question', 'Article', 'Audio', 'Document', 'Image', 'Page', 'Video', 'Event'];

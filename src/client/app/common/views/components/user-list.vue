@@ -14,6 +14,7 @@
 				<div class="name">
 					<router-link class="name" :to="user | userPage" v-user-preview="user.id"><mk-user-name :user="user"/></router-link>
 					<p class="username">@{{ user | acct }}</p>
+					<p class="followed" v-if="showFollows && user.isFollowed">{{ $t('follows-you') }}</p>
 				</div>
 				<div class="description" v-if="user.description" :title="user.description">
 					<mfm :text="user.description" :is-note="false" :author="user" :i="$store.state.i" :custom-emojis="user.emojis" :plain="true" :nowrap="true"/>
